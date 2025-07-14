@@ -116,6 +116,7 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
             fontSize={12}
             tickLine={false}
             axisLine={false}
+            tickFormatter={(value) => weekdayMap[value] || value}
           />
           <YAxis
             stroke="#6b7280"
