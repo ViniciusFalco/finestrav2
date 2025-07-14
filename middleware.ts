@@ -1,10 +1,10 @@
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { NextResponse, type NextRequest } from 'next/server'
 
-export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
-  })
+export async function middleware(req: NextRequest) {
+  // Log de execução do middleware
+  console.log('[MIDDLEWARE] Executando para:', req.nextUrl.pathname)
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -12,52 +12,36 @@ export async function middleware(request: NextRequest) {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          const all = req.cookies.getAll();
+          console.log('[MIDDLEWARE] Cookies recebidos:', all);
+          return all;
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
+          cookiesToSet.forEach(({ name, value }) => {
+            req.cookies.set(name, value)
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
         },
       },
     }
   )
 
-  // NOTE: Uncomment if you want to refresh user sessions on every request
-  // const { data: { user } } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
+  console.log('[MIDDLEWARE] Sessão encontrada:', session)
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const isAuthPage = req.nextUrl.pathname.startsWith('/login')
 
-  // If user is not signed in and the current path is not /login, redirect to /login
-  if (!user && request.nextUrl.pathname !== '/login') {
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/login'
-    return NextResponse.redirect(redirectUrl)
+  if (!session && !isAuthPage) {
+    console.log('[MIDDLEWARE] Não autenticado, redirecionando para /login')
+    return NextResponse.redirect(new URL('/login', req.url))
   }
-
-  // If user is signed in and the current path is /login, redirect to /dashboard
-  if (user && request.nextUrl.pathname === '/login') {
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/dashboard'
-    return NextResponse.redirect(redirectUrl)
+  if (session && isAuthPage) {
+    console.log('[MIDDLEWARE] Já autenticado, redirecionando para /dashboard')
+    return NextResponse.redirect(new URL('/dashboard', req.url))
   }
-
-  return supabaseResponse
+  console.log('[MIDDLEWARE] Acesso liberado para', req.nextUrl.pathname)
+  return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
-     */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
-  ],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)'],
 } 
