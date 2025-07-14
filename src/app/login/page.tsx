@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
 import { useRouter } from 'next/navigation'
 
@@ -12,28 +12,43 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false)
   const router = useRouter()
 
+  useEffect(() => {
+    // Debug: verificar se o Supabase está sendo inicializado
+    console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
+    console.log('Supabase Key exists:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+    console.log('Supabase client:', supabase)
+  }, [])
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
 
+    console.log('Tentando autenticar...', { email, isSignUp })
+
     try {
       if (isSignUp) {
+        console.log('Tentando signup...')
         const { error } = await supabase.auth.signUp({
           email,
           password,
         })
+        console.log('Signup result:', { error })
         if (error) throw error
         alert('Verifique seu email para confirmar o cadastro!')
       } else {
+        console.log('Tentando signin...')
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         })
+        console.log('Signin result:', { error })
         if (error) throw error
+        console.log('Login bem-sucedido, redirecionando...')
         router.push('/dashboard')
       }
     } catch (error: unknown) {
+      console.error('Erro na autenticação:', error)
       setError(error instanceof Error ? error.message : 'Erro desconhecido')
     } finally {
       setLoading(false)
