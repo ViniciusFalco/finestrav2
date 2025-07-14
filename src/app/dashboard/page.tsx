@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { DashboardLayout } from '@/components/DashboardLayout'
 
 export default function DashboardPage() {
   const [user, setUser] = useState<{ email?: string } | null>(null)
@@ -31,7 +32,7 @@ export default function DashboardPage() {
     )
   }
 
-  return (
+  const dashboardContent = (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">
@@ -87,4 +88,6 @@ export default function DashboardPage() {
       </div>
     </div>
   )
+
+  return <DashboardLayout>{dashboardContent}</DashboardLayout>
 } 

@@ -1,5 +1,9 @@
+'use client'
+
+import { DashboardLayout } from '@/components/DashboardLayout'
+
 export default function GoalsPage() {
-  return (
+  const goalsContent = (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Metas</h1>
@@ -15,4 +19,6 @@ export default function GoalsPage() {
       </div>
     </div>
   );
+
+  return <DashboardLayout>{goalsContent}</DashboardLayout>
 } 
