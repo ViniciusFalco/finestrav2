@@ -69,10 +69,11 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading = fal
 
   const totalRevenue = data.reduce((sum, item) => sum + (item.revenue || 0), 0);
   
-  // Adicionar totalRevenue aos dados para o tooltip
+  // Adicionar totalRevenue aos dados para o tooltip E garantir que name seja o nome do produto
   const chartData = data.map(item => ({
     ...item,
-    totalRevenue
+    totalRevenue,
+    name: item.product
   }));
 
   return (

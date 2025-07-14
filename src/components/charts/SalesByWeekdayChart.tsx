@@ -34,7 +34,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     const totalQuantity = data.totalQuantity || 0;
     const percentage = totalQuantity > 0 ? (quantity / totalQuantity) * 100 : 0;
     const avgTicket = 150; // Mock - seria calculado com dados reais
-    const labelPt = weekdayMap[label] || label;
+    const labelPt = data.weekdayPt || label;
     return (
       <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
         <p className="font-medium text-gray-900 mb-2">{`Dia: ${labelPt}`}</p>
@@ -92,7 +92,7 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
   const chartData = data.map(item => ({
     ...item,
     totalQuantity,
-    weekday: weekdayMap[item.weekday] || item.weekday
+    weekdayPt: weekdayMap[item.weekday] || item.weekday
   }));
 
   return (
@@ -111,12 +111,11 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
         <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis
-            dataKey="weekday"
+            dataKey="weekdayPt"
             stroke="#6b7280"
             fontSize={12}
             tickLine={false}
             axisLine={false}
-            tickFormatter={(value) => weekdayMap[value] || value}
           />
           <YAxis
             stroke="#6b7280"
@@ -137,14 +136,13 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
       <div className="mt-6">
         <h4 className="text-sm font-semibold text-gray-900 mb-3">Detalhamento por Dia</h4>
         <div className="space-y-2">
-          {data.map((item, index) => {
+          {chartData.map((item, index) => {
             const percentage = totalQuantity > 0 ? ((item.quantity || 0) / totalQuantity) * 100 : 0;
             const isHighest = (item.quantity || 0) === maxQuantity;
-            const weekdayPt = weekdayMap[item.weekday] || item.weekday;
             return (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <span className="text-gray-700 font-medium">{weekdayPt}</span>
+                  <span className="text-gray-700 font-medium">{item.weekdayPt}</span>
                   {isHighest && (
                     <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
                       Mais vendas
