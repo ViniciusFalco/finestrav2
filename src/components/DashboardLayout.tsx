@@ -4,7 +4,17 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from 'next/navigation';
 
-export function DashboardLayout({ children }: { children: ReactNode }) {
+interface DashboardLayoutProps {
+  children: ReactNode;
+  periodTotals?: {
+    totalRevenue: number;
+    totalRefunds: number;
+    totalExpenses: number;
+    totalProfit: number;
+  };
+}
+
+export function DashboardLayout({ children, periodTotals }: DashboardLayoutProps) {
   const [open, setOpen] = useState(true);
   const router = useRouter();
 
@@ -72,19 +82,27 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
               {/* Cards de resumo */}
               <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg min-w-[120px]">
                 <div className="text-sm text-blue-600 font-medium">Faturamento</div>
-                <div className="text-lg font-bold text-blue-900">R$ 0,00</div>
+                <div className="text-lg font-bold text-blue-900">
+                  R$ {periodTotals?.totalRevenue.toLocaleString() || '0'}
+                </div>
               </div>
               <div className="bg-red-50 border border-red-200 p-3 rounded-lg min-w-[120px]">
                 <div className="text-sm text-red-600 font-medium">Reembolsos</div>
-                <div className="text-lg font-bold text-red-900">R$ 0,00</div>
+                <div className="text-lg font-bold text-red-900">
+                  R$ {periodTotals?.totalRefunds.toLocaleString() || '0'}
+                </div>
               </div>
               <div className="bg-orange-50 border border-orange-200 p-3 rounded-lg min-w-[120px]">
                 <div className="text-sm text-orange-600 font-medium">Despesas</div>
-                <div className="text-lg font-bold text-orange-900">R$ 0,00</div>
+                <div className="text-lg font-bold text-orange-900">
+                  R$ {periodTotals?.totalExpenses.toLocaleString() || '0'}
+                </div>
               </div>
               <div className="bg-green-50 border border-green-200 p-3 rounded-lg min-w-[120px]">
                 <div className="text-sm text-green-600 font-medium">Lucro Líquido</div>
-                <div className="text-lg font-bold text-green-900">R$ 0,00</div>
+                <div className="text-lg font-bold text-green-900">
+                  R$ {periodTotals?.totalProfit.toLocaleString() || '0'}
+                </div>
               </div>
             </div>
           </div>

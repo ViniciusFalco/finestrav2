@@ -1,93 +1,147 @@
-'use client'
+'use client';
 
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabaseClient'
-import { DashboardLayout } from '@/components/DashboardLayout'
+import { useState } from 'react';
+import { DashboardLayout } from '@/components/DashboardLayout';
+import DailyChart from '@/components/charts/DailyChart';
+import AccumulatedChart from '@/components/charts/AccumulatedChart';
+import BalanceChart from '@/components/charts/BalanceChart';
+import ExpenseDistributionChart from '@/components/charts/ExpenseDistribution';
+import TopProductsChart from '@/components/charts/TopProductsChart';
+import SalesByPlatformChart from '@/components/charts/SalesByPlatformChart';
+import SalesByWeekdayChart from '@/components/charts/SalesByWeekdayChart';
+import SalesByHourChart from '@/components/charts/SalesByHourChart';
+import { useDashboardData } from '@/hooks/useDashboardData';
 
 export default function DashboardPage() {
-  const [user, setUser] = useState<{ email?: string } | null>(null)
-  const [loading, setLoading] = useState(true)
+  // Estado para filtros
+  const [startDate, setStartDate] = useState('2024-01-01');
+  const [endDate, setEndDate] = useState('2024-01-07');
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
 
-  useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      setUser(user)
-      setLoading(false)
-    }
+  // Hook para buscar dados
+  const {
+    dailyData,
+    accumulatedData,
+    periodTotals,
+    expenseDistribution,
+    topProducts,
+    salesByPlatform,
+    salesByWeekday,
+    salesByHour,
+    loading,
+    error,
+  } = useDashboardData(startDate, endDate, selectedProducts);
 
-    getUser()
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  if (loading) {
+  if (error) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-xl">Carregando...</div>
-      </div>
-    )
+      <DashboardLayout>
+        <div className="p-6">
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-red-800">Erro ao carregar dados: {error}</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
   }
 
-  const dashboardContent = (
-    <div className="space-y-6">
-      <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4">
-          Dashboard Finestra V2
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Bem-vindo ao seu painel de controle financeiro, {user?.email}!
-        </p>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-lg">
-            <h3 className="text-lg font-medium mb-2">Total de Vendas</h3>
-            <p className="text-3xl font-bold">R$ 0,00</p>
-            <p className="text-blue-100 text-sm">Este mês</p>
+  return (
+    <DashboardLayout periodTotals={periodTotals}>
+      <div className="p-6 space-y-6">
+        {/* Filtros */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">Filtros</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Data Inicial
+              </label>
+              <input
+                type="date"
+                id="startDate"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+                Data Final
+              </label>
+              <input
+                type="date"
+                id="endDate"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label htmlFor="products" className="block text-sm font-medium text-gray-700 mb-1">
+                Produtos
+              </label>
+              <select
+                id="products"
+                value={selectedProducts.length > 0 ? 'selected' : 'all'}
+                onChange={(e) => {
+                  if (e.target.value === 'all') {
+                    setSelectedProducts([]);
+                  } else {
+                    // Por enquanto, simula seleção de produtos específicos
+                    setSelectedProducts(['produto-a', 'produto-b']);
+                  }
+                }}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">Todos os produtos</option>
+                <option value="selected">Produtos específicos</option>
+              </select>
+            </div>
           </div>
-          
-          <div className="bg-gradient-to-r from-green-500 to-green-600 text-white p-6 rounded-lg">
-            <h3 className="text-lg font-medium mb-2">Lucro Líquido</h3>
-            <p className="text-3xl font-bold">R$ 0,00</p>
-            <p className="text-green-100 text-sm">Este mês</p>
+        </div>
+
+        {/* Gráficos */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Resumo Diário */}
+          <div className="lg:col-span-2">
+            <DailyChart data={dailyData} loading={loading} />
           </div>
-          
-          <div className="bg-gradient-to-r from-red-500 to-red-600 text-white p-6 rounded-lg">
-            <h3 className="text-lg font-medium mb-2">Total de Despesas</h3>
-            <p className="text-3xl font-bold">R$ 0,00</p>
-            <p className="text-red-100 text-sm">Este mês</p>
+
+          {/* Resumo Acumulado */}
+          <div className="lg:col-span-2">
+            <AccumulatedChart data={accumulatedData} loading={loading} />
           </div>
-          
-          <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-lg">
-            <h3 className="text-lg font-medium mb-2">Metas Ativas</h3>
-            <p className="text-3xl font-bold">0</p>
-            <p className="text-purple-100 text-sm">Em andamento</p>
+
+          {/* Cobertura de Receita vs Despesa */}
+          <div>
+            <BalanceChart data={periodTotals} loading={loading} />
+          </div>
+
+          {/* Distribuição de Despesas */}
+          <div>
+            <ExpenseDistributionChart data={expenseDistribution} loading={loading} />
+          </div>
+
+          {/* Top Produtos */}
+          <div>
+            <TopProductsChart data={topProducts} loading={loading} />
+          </div>
+
+          {/* Vendas por Plataforma */}
+          <div>
+            <SalesByPlatformChart data={salesByPlatform} loading={loading} />
+          </div>
+
+          {/* Vendas por Dia da Semana */}
+          <div>
+            <SalesByWeekdayChart data={salesByWeekday} loading={loading} />
+          </div>
+
+          {/* Vendas por Horário */}
+          <div>
+            <SalesByHourChart data={salesByHour} loading={loading} />
           </div>
         </div>
       </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Vendas Recentes</h2>
-          <div className="text-center text-gray-500 py-8">
-            <p>Nenhuma venda registrada ainda</p>
-            <p className="text-sm">Adicione sua primeira venda na seção Vendas</p>
-          </div>
-        </div>
-        
-        <div className="bg-white rounded-lg shadow p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Despesas Recentes</h2>
-          <div className="text-center text-gray-500 py-8">
-            <p>Nenhuma despesa registrada ainda</p>
-            <p className="text-sm">Adicione sua primeira despesa na seção Despesas</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
-  return <DashboardLayout>{dashboardContent}</DashboardLayout>
+    </DashboardLayout>
+  );
 } 
