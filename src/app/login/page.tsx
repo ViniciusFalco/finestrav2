@@ -65,6 +65,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-secondary-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md shadow-strong">
         <CardHeader className="space-y-1">
+          <h1 className="mb-6 text-3xl font-bold text-center text-primary-600">Finestra</h1>
           <CardTitle className="text-2xl font-bold text-center text-neutral-900">
             {isSignUp ? 'Criar conta' : 'Entrar na sua conta'}
           </CardTitle>
@@ -142,6 +143,14 @@ export default function LoginPage() {
               size="lg"
             >
               {loading ? 'Carregando...' : isSignUp ? 'Cadastrar' : 'Entrar'}
+            </Button>
+            <Button
+              variant="link"
+              disabled
+              onClick={() => {}}
+              className="w-full"
+            >
+              Esqueci a senha
             </Button>
           </form>
         </CardContent>
