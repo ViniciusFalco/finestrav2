@@ -22,21 +22,12 @@ export default function DashboardClient() {
   const [dateRange, setDateRange] = useState({ start: subDays(new Date(), 29), end: new Date() });
   const [productIds, setProductIds] = useState<string[]>([]);
 
-  // Hook para buscar dados
-  const {
-    dailyData,
-    accumulatedData,
-    periodTotals,
-    expenseDistribution,
-    topProducts,
-    salesByPlatform,
-    salesByWeekday,
-    salesByHour,
-    allProducts,
-    loading,
-    error,
-    refreshData,
-  } = useDashboardData({ dateRange, productIds });
+  // Hook para buscar dados filtrados
+  const { data, loading, error } = useDashboardData({
+    start: dateRange.start,
+    end: dateRange.end,
+    productIds
+  });
 
   if (error) {
     return (
@@ -51,7 +42,7 @@ export default function DashboardClient() {
   }
 
   return (
-    <DashboardLayout periodTotals={periodTotals}>
+    <DashboardLayout>
       <div className="space-y-6">
         {/* Header com título e filtros */}
         <div className="flex justify-between items-center mb-6">
@@ -63,14 +54,11 @@ export default function DashboardClient() {
               <ProductMultiSelect
                 value={productIds}
                 onChange={setProductIds}
-                options={allProducts}
+                options={data.allProducts || []}
               />
               <button
                 className="mt-4 w-full bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 transition-colors"
-                onClick={() => {
-                  refreshData();
-                  document.body.click(); // fecha drawer
-                }}
+                onClick={() => {}}
               >
                 Aplicar filtros
               </button>
@@ -82,42 +70,49 @@ export default function DashboardClient() {
         <div className="space-y-6">
           <Card className="shadow-soft">
             <CardContent className="p-6">
-              <DailyChart data={dailyData} loading={loading} />
+              <DailyChart data={data.sales || []} loading={loading} />
             </CardContent>
           </Card>
+
           <Card className="shadow-soft">
             <CardContent className="p-6">
-              <AccumulatedChart data={accumulatedData} loading={loading} />
+              <AccumulatedChart data={data.accumulated || []} loading={loading} />
             </CardContent>
           </Card>
+
           <Card className="shadow-soft">
             <CardContent className="p-6">
-              <BalanceChart data={periodTotals} loading={loading} />
+              <BalanceChart data={data.balanceData || []} loading={loading} />
             </CardContent>
           </Card>
+
           <Card className="shadow-soft">
             <CardContent className="p-6">
-              <ExpenseDistributionChart data={expenseDistribution} loading={loading} />
+              <TopProductsChart data={data.topProducts || []} loading={loading} />
             </CardContent>
           </Card>
+
           <Card className="shadow-soft">
             <CardContent className="p-6">
-              <TopProductsChart data={topProducts} loading={loading} />
+              <SalesByPlatformChart data={data.salesByPlatform || []} loading={loading} />
             </CardContent>
           </Card>
+
           <Card className="shadow-soft">
             <CardContent className="p-6">
-              <SalesByPlatformChart data={salesByPlatform} loading={loading} />
+              <SalesByWeekdayChart data={data.salesByWeekday || []} loading={loading} />
             </CardContent>
           </Card>
+
           <Card className="shadow-soft">
             <CardContent className="p-6">
-              <SalesByWeekdayChart data={salesByWeekday} loading={loading} />
+              <SalesByHourChart data={data.salesByHour || []} loading={loading} />
             </CardContent>
           </Card>
+
           <Card className="shadow-soft">
             <CardContent className="p-6">
-              <SalesByHourChart data={salesByHour} loading={loading} />
+              <ExpenseDistributionChart data={data.expenseDistribution || []} loading={loading} />
             </CardContent>
           </Card>
         </div>

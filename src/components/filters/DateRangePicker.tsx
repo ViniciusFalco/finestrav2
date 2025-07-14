@@ -4,10 +4,20 @@ import { CalendarDays } from 'lucide-react'
 import { format, subDays } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { useState } from 'react'
+import React from 'react'
 
 interface Range { start: Date; end: Date }
 export function DateRangePicker ({ value, onChange }: { value: Range; onChange: (r: Range) => void }) {
   const [open, setOpen] = useState(false)
+  // Estados locais para inputs manuais
+  const [startInput, setStartInput] = useState(value.start.toISOString().slice(0, 10))
+  const [endInput, setEndInput] = useState(value.end.toISOString().slice(0, 10))
+
+  // Atualiza inputs locais quando valor externo muda
+  React.useEffect(() => {
+    setStartInput(value.start.toISOString().slice(0, 10))
+    setEndInput(value.end.toISOString().slice(0, 10))
+  }, [value.start, value.end])
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -18,8 +28,30 @@ export function DateRangePicker ({ value, onChange }: { value: Range; onChange: 
           {format(value.end, 'dd MMM', { locale: ptBR })}
         </button>
       </PopoverTrigger>
-      <PopoverContent side="bottom" className="w-80 rounded-md border bg-white p-4 shadow">
-        {/*  — para simplificar, usar 3 atalhos em vez de date-picker completo — */}
+      <PopoverContent side="bottom" className="z-[9999] w-80 rounded-md border bg-white p-4 shadow space-y-4 mb-2">
+        {/* Inputs manuais */}
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            value={startInput}
+            onChange={e => setStartInput(e.target.value)}
+            onBlur={() => {
+              if (startInput) onChange({ start: new Date(startInput), end: value.end })
+            }}
+            className="border rounded px-2 py-1 text-sm"
+          />
+          <span className="text-neutral-400">–</span>
+          <input
+            type="date"
+            value={endInput}
+            onChange={e => setEndInput(e.target.value)}
+            onBlur={() => {
+              if (endInput) onChange({ start: value.start, end: new Date(endInput) })
+            }}
+            className="border rounded px-2 py-1 text-sm"
+          />
+        </div>
+        {/* Atalhos rápidos */}
         <div className="space-y-2">
           {[
             { label: 'Últimos 7 dias', days: 7 },

@@ -1,5 +1,5 @@
 'use client'
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet'
 import { SlidersHorizontal } from 'lucide-react'
 import { ReactNode } from 'react'
 
@@ -12,7 +12,7 @@ export function FilterDrawer ({ children }: { children: ReactNode }) {
         </button>
       </SheetTrigger>
       <SheetContent side="left" className="w-80 sm:w-96 bg-white p-6">
-        <h2 className="mb-4 text-lg font-semibold">Filtros</h2>
+        <SheetTitle className="mb-4 text-lg font-semibold">Filtros</SheetTitle>
         {children}
       </SheetContent>
     </Sheet>
