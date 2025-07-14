@@ -27,19 +27,25 @@ const Modal = React.forwardRef<HTMLDivElement, ModalProps>(
         <div
           ref={ref}
           className={cn(
-            "relative w-full max-w-md transform rounded-lg bg-white p-6 shadow-strong transition-all",
-            "sm:max-w-lg md:max-w-xl lg:max-w-2xl",
+            "relative w-full max-w-md transform rounded-lg bg-white p-6 shadow-xl transition-all",
             className
           )}
-          onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={title ? "modal-title" : undefined}
         >
           {/* Header */}
           {title && (
-            <div className="mb-4 flex items-center justify-between border-b border-neutral-200 pb-4">
-              <h2 className="text-lg font-semibold text-neutral-900">{title}</h2>
+            <div className="mb-4 flex items-center justify-between">
+              <h2
+                id="modal-title"
+                className="text-lg font-semibold text-neutral-900"
+              >
+                {title}
+              </h2>
               <button
                 onClick={onClose}
-                className="rounded-full p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600 transition-colors"
+                className="rounded-md p-1 text-neutral-400 hover:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 aria-label="Fechar modal"
               >
                 <X className="h-5 w-5" />
