@@ -39,6 +39,30 @@ export interface Product {
   name: string;
 }
 
+export interface SalesByPlatform {
+  platform: string;
+  quantity: number;
+  revenue: number;
+  refunds: number;
+}
+
+export interface SalesByWeekday {
+  weekday: string;
+  quantity: number;
+}
+
+export interface SalesByHour {
+  hourRange: string;
+  quantity: number;
+}
+
+export interface ExpenseDistribution {
+  category: string;
+  amount: number;
+  type: 'fixed' | 'variable';
+  percentage: number;
+}
+
 export function useDashboardData(filters: DashboardFilter) {
   const { start, end, productIds } = filters;
   const [data, setData] = useState<{
@@ -47,10 +71,10 @@ export function useDashboardData(filters: DashboardFilter) {
     periodTotals: PeriodTotals;
     allProducts: Product[];
     topProducts: TopProduct[];
-    salesByPlatform: Array<{ platform: string; sales: number }>;
-    salesByWeekday: Array<{ day: string; sales: number }>;
-    salesByHour: Array<{ hour: number; sales: number }>;
-    expenseDistribution: Array<{ category: string; amount: number }>;
+    salesByPlatform: SalesByPlatform[];
+    salesByWeekday: SalesByWeekday[];
+    salesByHour: SalesByHour[];
+    expenseDistribution: ExpenseDistribution[];
     balanceData: Array<{ month: string; revenue: number; expenses: number }>;
   }>({
     sales: [],
@@ -72,44 +96,125 @@ export function useDashboardData(filters: DashboardFilter) {
       setLoading(true);
       setError(null);
       try {
-        // --- consulta dinâmica ---
         const supabase = supabaseBrowser();
-        let q = supabase
-          .from('sales') // trocado para a tabela real
-          .select('*')
-          .gte('date', start.toISOString())
-          .lte('date', end.toISOString());
-        if (productIds.length) q = q.in('product_id', productIds);
-        const { data: sales, error: salesError } = await q;
-
-        // Produtos para o multi-select
+        
+        // Construir filtros de data
+        const startDate = start.toISOString().split('T')[0];
+        const endDate = end.toISOString().split('T')[0];
+        
+        // 1. Buscar produtos para o multi-select
         const { data: allProducts, error: prodError } = await supabase
           .from('products')
           .select('id, name')
           .order('name');
 
-        if (salesError) setError(salesError.message);
-        else if (prodError) setError(prodError.message);
-        else {
-          // Transformar dados de vendas em formato para gráficos
-          const dailyData = transformSalesToDailySummary(sales || []);
-          const accumulatedData = transformToAccumulatedSummary(dailyData);
-          const periodTotals = calculatePeriodTotals(dailyData);
-          
-          setData({ 
-            sales: dailyData, 
-            accumulated: accumulatedData,
-            periodTotals,
-            allProducts: allProducts || [],
-            // Dados mockados para outros gráficos por enquanto
-            topProducts: generateMockTopProducts(),
-            salesByPlatform: generateMockSalesByPlatform(),
-            salesByWeekday: generateMockSalesByWeekday(),
-            salesByHour: generateMockSalesByHour(),
-            expenseDistribution: generateMockExpenseDistribution(),
-            balanceData: generateMockBalanceData()
-          });
+        if (prodError) {
+          setError(prodError.message);
+          setLoading(false);
+          return;
         }
+
+        // 2. Buscar dados de vendas filtrados por data e produtos
+        let salesQuery = supabase
+          .from('sales')
+          .select('*')
+          .gte('date', startDate)
+          .lte('date', endDate);
+        
+        if (productIds.length > 0) {
+          salesQuery = salesQuery.in('product_id', productIds);
+        }
+        
+        const { data: sales, error: salesError } = await salesQuery;
+
+        if (salesError) {
+          setError(salesError.message);
+          setLoading(false);
+          return;
+        }
+
+        // 3. Buscar dados de despesas filtrados por data
+        const { data: expenses, error: expensesError } = await supabase
+          .from('expenses')
+          .select('*')
+          .gte('date', startDate)
+          .lte('date', endDate);
+
+        if (expensesError) {
+          setError(expensesError.message);
+          setLoading(false);
+          return;
+        }
+
+        // 4. Buscar dados de reembolsos filtrados por data
+        const { data: refunds, error: refundsError } = await supabase
+          .from('refunds')
+          .select('*')
+          .gte('date', startDate)
+          .lte('date', endDate);
+
+        if (refundsError) {
+          setError(refundsError.message);
+          setLoading(false);
+          return;
+        }
+
+        // 5. Buscar dados das views (com filtros aplicados)
+        const [
+          { data: salesByPlatform },
+          { data: salesByWeekday },
+          { data: salesByHour },
+          { data: topProducts },
+          { data: expenseDistribution }
+        ] = await Promise.all([
+          supabase.from('sales_by_platform').select('*').gte('date', startDate).lte('date', endDate),
+          supabase.from('sales_by_weekday').select('*').gte('date', startDate).lte('date', endDate),
+          supabase.from('sales_by_hour').select('*'), // Não aplicar filtro de data - view já agrega todos os dados
+          supabase.from('top_products').select('*').gte('date', startDate).lte('date', endDate),
+          supabase.from('expense_distribution').select('*').gte('date', startDate).lte('date', endDate)
+        ]);
+
+        // Mapear dias da semana para pt-BR
+        const ptWeek: Record<string, string> = {
+          Sun: 'Dom', Mon: 'Seg', Tue: 'Ter', Wed: 'Qua', Thu: 'Qui', Fri: 'Sex', Sat: 'Sáb',
+        };
+        const salesByWeekdayPt = (salesByWeekday || []).map((r: any) => ({
+          ...r,
+          weekday: ptWeek[r.weekday as keyof typeof ptWeek] ?? r.weekday,
+        }));
+        
+        // 6. Transformar dados de vendas em formato para gráficos
+        const dailyData = transformSalesToDailySummary(sales || [], expenses || [], refunds || []);
+        const accumulatedData = transformToAccumulatedSummary(dailyData);
+        const periodTotals = calculatePeriodTotals(dailyData);
+
+        // Garantir que salesByHour tenha as 4 faixas e o campo correto
+        const hourRanges = [
+          '00:00 - 05:59',
+          '06:00 - 11:59',
+          '12:00 - 17:59',
+          '18:00 - 23:59'
+        ];
+        const salesByHourMapped = hourRanges.map(hr => {
+          const found = (salesByHour || []).find((item: { hour_range?: string; hourRange?: string; quantity: number }) => item.hour_range === hr || item.hourRange === hr);
+          return {
+            hourRange: hr,
+            quantity: found ? found.quantity : 0
+          };
+        });
+        
+        setData({ 
+          sales: dailyData, 
+          accumulated: accumulatedData,
+          periodTotals,
+          allProducts: allProducts || [],
+          topProducts: topProducts || [],
+          salesByPlatform: salesByPlatform || [],
+          salesByWeekday: salesByWeekdayPt,
+          salesByHour: salesByHourMapped,
+          expenseDistribution: expenseDistribution || [],
+          balanceData: generateMockBalanceData() // Mantido mockado por enquanto
+        });
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Erro ao carregar dados';
         setError(errorMessage);
@@ -122,29 +227,70 @@ export function useDashboardData(filters: DashboardFilter) {
 }
 
 // Função para transformar vendas em resumo diário
-function transformSalesToDailySummary(sales: Array<{ date: string; amount: string | number; cost: string | number; refunded?: boolean }>): DailySummary[] {
+function transformSalesToDailySummary(
+  sales: Array<{ date: string; net_amount: number }>,
+  expenses: Array<{ date: string; amount: number }>,
+  refunds: Array<{ date: string; amount: number }>
+): DailySummary[] {
   const dailyMap = new Map<string, DailySummary>();
   
+  // Processar vendas
   sales.forEach(sale => {
-    const date = sale.date.split('T')[0]; // Pega só a data
-    const revenue = parseFloat(String(sale.amount)) || 0;
-    const expenses = parseFloat(String(sale.cost)) || 0;
-    const profit = revenue - expenses;
-    const refunds = sale.refunded ? revenue : 0;
+    const date = sale.date;
+    const revenue = parseFloat(String(sale.net_amount)) || 0;
     
     if (dailyMap.has(date)) {
       const existing = dailyMap.get(date)!;
       existing.revenue += revenue;
-      existing.expenses += expenses;
-      existing.profit += profit;
-      existing.refunds += refunds;
+      existing.profit += revenue;
     } else {
       dailyMap.set(date, {
         date,
         revenue,
-        expenses,
-        profit,
-        refunds
+        expenses: 0,
+        profit: revenue,
+        refunds: 0
+      });
+    }
+  });
+
+  // Processar despesas
+  expenses.forEach(expense => {
+    const date = expense.date;
+    const amount = parseFloat(String(expense.amount)) || 0;
+    
+    if (dailyMap.has(date)) {
+      const existing = dailyMap.get(date)!;
+      existing.expenses += amount;
+      existing.profit -= amount;
+    } else {
+      dailyMap.set(date, {
+        date,
+        revenue: 0,
+        expenses: amount,
+        profit: -amount,
+        refunds: 0
+      });
+    }
+  });
+
+  // Processar reembolsos
+  refunds.forEach(refund => {
+    const date = refund.date;
+    const amount = parseFloat(String(refund.amount)) || 0;
+    
+    if (dailyMap.has(date)) {
+      const existing = dailyMap.get(date)!;
+      existing.refunds += amount;
+      existing.revenue -= amount;
+      existing.profit -= amount;
+    } else {
+      dailyMap.set(date, {
+        date,
+        revenue: -amount,
+        expenses: 0,
+        profit: -amount,
+        refunds: amount
       });
     }
   });
@@ -187,55 +333,7 @@ function calculatePeriodTotals(dailyData: DailySummary[]): PeriodTotals {
   return totals;
 }
 
-// Funções para gerar dados mockados para outros gráficos
-function generateMockTopProducts(): TopProduct[] {
-  return [
-    { product: 'Produto A', revenue: 15000 },
-    { product: 'Produto B', revenue: 12000 },
-    { product: 'Produto C', revenue: 10000 },
-    { product: 'Produto D', revenue: 8000 },
-    { product: 'Produto E', revenue: 6000 }
-  ];
-}
-
-function generateMockSalesByPlatform() {
-  return [
-    { platform: 'Shopee', sales: 45 },
-    { platform: 'Mercado Livre', sales: 30 },
-    { platform: 'Instagram', sales: 15 },
-    { platform: 'WhatsApp', sales: 10 }
-  ];
-}
-
-function generateMockSalesByWeekday() {
-  return [
-    { day: 'Seg', sales: 20 },
-    { day: 'Ter', sales: 25 },
-    { day: 'Qua', sales: 30 },
-    { day: 'Qui', sales: 35 },
-    { day: 'Sex', sales: 40 },
-    { day: 'Sáb', sales: 45 },
-    { day: 'Dom', sales: 15 }
-  ];
-}
-
-function generateMockSalesByHour() {
-  return Array.from({ length: 24 }, (_, i) => ({
-    hour: i,
-    sales: Math.floor(Math.random() * 50) + 10
-  }));
-}
-
-function generateMockExpenseDistribution() {
-  return [
-    { category: 'Marketing', amount: 30 },
-    { category: 'Logística', amount: 25 },
-    { category: 'Operacional', amount: 20 },
-    { category: 'Administrativo', amount: 15 },
-    { category: 'Outros', amount: 10 }
-  ];
-}
-
+// Função para gerar dados mockados de balance (mantida por enquanto)
 function generateMockBalanceData() {
   return [
     { month: 'Jan', revenue: 5000, expenses: 3000 },
