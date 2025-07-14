@@ -114,6 +114,7 @@ const mockSalesByHour: SalesByHour[] = [
 export const getDailySummary = async (
   startDate: string,
   endDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   productIds?: string[]
 ): Promise<DailySummary[]> => {
   // TODO: Implementar chamada real para o Supabase
@@ -125,8 +126,11 @@ export const getDailySummary = async (
 
 // Função para obter dados acumulados
 export const getAccumulatedSummary = async (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   endDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   productIds?: string[]
 ): Promise<AccumulatedSummary[]> => {
   const dailyData = await getDailySummary(startDate, endDate, productIds);
@@ -152,8 +156,11 @@ export const getAccumulatedSummary = async (
 
 // Função para obter totais do período
 export const getPeriodTotals = async (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   endDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   productIds?: string[]
 ): Promise<PeriodTotals> => {
   const dailyData = await getDailySummary(startDate, endDate, productIds);
@@ -173,7 +180,9 @@ export const getPeriodTotals = async (
 
 // Função para obter distribuição de despesas
 export const getExpenseDistribution = async (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   endDate: string
 ): Promise<ExpenseDistribution[]> => {
   // TODO: Implementar chamada real para o Supabase
@@ -183,8 +192,11 @@ export const getExpenseDistribution = async (
 
 // Novas funções para Sprint 5
 export const getTopProducts = async (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   endDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   productIds?: string[]
 ): Promise<TopProduct[]> => {
   // TODO: Implementar chamada real para o Supabase
@@ -193,8 +205,11 @@ export const getTopProducts = async (
 };
 
 export const getSalesByPlatform = async (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   endDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   productIds?: string[]
 ): Promise<SalesByPlatform[]> => {
   // TODO: Implementar chamada real para o Supabase
@@ -203,8 +218,11 @@ export const getSalesByPlatform = async (
 };
 
 export const getSalesByWeekday = async (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   endDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   productIds?: string[]
 ): Promise<SalesByWeekday[]> => {
   // TODO: Implementar chamada real para o Supabase
@@ -213,8 +231,11 @@ export const getSalesByWeekday = async (
 };
 
 export const getSalesByHour = async (
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   startDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   endDate: string,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   productIds?: string[]
 ): Promise<SalesByHour[]> => {
   // TODO: Implementar chamada real para o Supabase
