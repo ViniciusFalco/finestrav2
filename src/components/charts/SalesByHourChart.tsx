@@ -23,6 +23,7 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     const quantity = data.quantity || 0;
     const totalQuantity = data.totalQuantity || 0;
     const percentage = totalQuantity > 0 ? (quantity / totalQuantity) * 100 : 0;
+    const avgTicket = 150; // Mock - seria calculado com dados reais
     
     return (
       <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
@@ -30,6 +31,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <div className="space-y-1 text-sm">
           <p className="text-yellow-600">
             <span className="font-medium">Quantidade:</span> {quantity}
+          </p>
+          <p className="text-green-600">
+            <span className="font-medium">Valor total:</span> R$ {(quantity * avgTicket).toLocaleString()}
+          </p>
+          <p className="text-purple-600">
+            <span className="font-medium">Ticket médio:</span> R$ {avgTicket.toFixed(0)}
           </p>
           <p className="text-gray-600">
             <span className="font-medium">Percentual:</span> {percentage.toFixed(1)}%

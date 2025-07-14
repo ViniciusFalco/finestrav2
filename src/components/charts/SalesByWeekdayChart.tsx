@@ -17,12 +17,23 @@ interface SalesByWeekdayChartProps {
   loading?: boolean;
 }
 
+const weekdayMap: { [key: string]: string } = {
+  'Sunday': 'Dom',
+  'Monday': 'Seg', 
+  'Tuesday': 'Ter',
+  'Wednesday': 'Qua',
+  'Thursday': 'Qui',
+  'Friday': 'Sex',
+  'Saturday': 'Sáb'
+};
+
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const quantity = data.quantity || 0;
     const totalQuantity = data.totalQuantity || 0;
     const percentage = totalQuantity > 0 ? (quantity / totalQuantity) * 100 : 0;
+    const avgTicket = 150; // Mock - seria calculado com dados reais
     
     return (
       <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
@@ -30,6 +41,12 @@ const CustomTooltip = ({ active, payload, label }: any) => {
         <div className="space-y-1 text-sm">
           <p className="text-blue-600">
             <span className="font-medium">Quantidade:</span> {quantity}
+          </p>
+          <p className="text-green-600">
+            <span className="font-medium">Valor total:</span> R$ {(quantity * avgTicket).toLocaleString()}
+          </p>
+          <p className="text-purple-600">
+            <span className="font-medium">Ticket médio:</span> R$ {avgTicket.toFixed(0)}
           </p>
           <p className="text-gray-600">
             <span className="font-medium">Percentual:</span> {percentage.toFixed(1)}%
@@ -71,10 +88,11 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
   const totalQuantity = data.reduce((sum, item) => sum + (item.quantity || 0), 0);
   const maxQuantity = Math.max(...data.map(item => item.quantity || 0));
   
-  // Adicionar totalQuantity aos dados para o tooltip
+  // Adicionar totalQuantity aos dados para o tooltip e traduzir dias da semana
   const chartData = data.map(item => ({
     ...item,
-    totalQuantity
+    totalQuantity,
+    weekday: weekdayMap[item.weekday] || item.weekday
   }));
 
   return (

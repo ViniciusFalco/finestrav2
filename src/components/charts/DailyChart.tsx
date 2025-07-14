@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ReferenceLine,
 } from 'recharts';
 import { DailySummary } from '@/hooks/useDashboardData';
 
@@ -90,6 +91,7 @@ const DailyChart: React.FC<DailyChartProps> = ({ data, loading = false }) => {
             width={80}
             tickFormatter={(value) => `R$ ${value.toLocaleString()}`}
           />
+          <ReferenceLine y={0} stroke="#d1d5db" strokeDasharray="3 3" />
           <Tooltip content={<CustomTooltip />} />
           <Legend />
           <Line

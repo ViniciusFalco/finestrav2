@@ -124,10 +124,11 @@ const AccumulatedChart: React.FC<AccumulatedChartProps> = ({ data, loading = fal
               type="monotone"
               dataKey="cumHistoricalAvg"
               stackId="1"
-              stroke="#f59e0b"
-              fill="#f59e0b"
-              fillOpacity={0.4}
-              name="Média Histórica"
+              stroke="#6b7280"
+              fill="#6b7280"
+              fillOpacity={0.2}
+              strokeDasharray="5 5"
+              name="Média anos anteriores"
             />
           )}
         </AreaChart>

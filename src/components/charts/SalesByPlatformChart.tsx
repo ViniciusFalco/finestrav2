@@ -17,6 +17,8 @@ interface SalesByPlatformChartProps {
   loading?: boolean;
 }
 
+const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
@@ -125,12 +127,15 @@ const SalesByPlatformChart: React.FC<SalesByPlatformChartProps> = ({ data, loadi
             tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
           />
           <Tooltip content={<CustomTooltip />} />
-          <Bar
-            dataKey="revenue"
-            fill="#10b981"
-            radius={[4, 4, 0, 0]}
-            name="revenue"
-          />
+          {data.map((entry, index) => (
+            <Bar
+              key={index}
+              dataKey="revenue"
+              fill={COLORS[index % COLORS.length]}
+              radius={[4, 4, 0, 0]}
+              name="revenue"
+            />
+          ))}
         </BarChart>
       </ResponsiveContainer>
 

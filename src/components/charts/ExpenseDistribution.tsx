@@ -15,6 +15,26 @@ interface ExpenseDistributionChartProps {
   loading?: boolean;
 }
 
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-medium text-gray-900 mb-2">{data.name}</p>
+        <div className="space-y-1 text-sm">
+          <p className="text-gray-600">
+            <span className="font-medium">Valor:</span> R$ {(data.value || 0).toLocaleString()}
+          </p>
+          <p className="text-blue-600">
+            <span className="font-medium">Percentual:</span> {(((data.value || 0) / (data.total || 1)) * 100).toFixed(1)}%
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({ 
   data, 
   loading = false 
@@ -52,16 +72,18 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({
   const totalFixed = fixedExpenses.reduce((sum, item) => sum + (item.amount || 0), 0);
   const totalVariable = variableExpenses.reduce((sum, item) => sum + (item.amount || 0), 0);
 
+  const total = totalFixed + totalVariable;
   const pieData = [
-    { name: 'Despesas Fixas', value: totalFixed, color: '#ef4444' },
-    { name: 'Despesas Variáveis', value: totalVariable, color: '#3b82f6' },
+    { name: 'Despesas Fixas', value: totalFixed, color: '#ef4444', total },
+    { name: 'Despesas Variáveis', value: totalVariable, color: '#3b82f6', total },
   ];
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+      <h3 className="text-lg font-semibold text-gray-900 mb-2">
         Distribuição de Despesas
       </h3>
+      <p className="text-sm text-gray-600 mb-4">Fixas vs Variáveis</p>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Gráfico de pizza */}
@@ -82,15 +104,7 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                }}
-                formatter={(value: number) => [`R$ ${(value || 0).toLocaleString()}`, '']}
-              />
+              <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
         </div>

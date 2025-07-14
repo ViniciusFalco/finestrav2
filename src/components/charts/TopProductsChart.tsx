@@ -15,6 +15,29 @@ interface TopProductsChartProps {
   loading?: boolean;
 }
 
+const CustomTooltip = ({ active, payload }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const totalRevenue = payload[0].payload.totalRevenue || 0;
+    const percentage = totalRevenue > 0 ? (data.revenue / totalRevenue) * 100 : 0;
+    
+    return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-medium text-gray-900 mb-2">{data.product}</p>
+        <div className="space-y-1 text-sm">
+          <p className="text-green-600">
+            <span className="font-medium">Receita:</span> R$ {data.revenue.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+          </p>
+          <p className="text-blue-600">
+            <span className="font-medium">Percentual:</span> {percentage.toFixed(1).replace('.', ',')}%
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
 const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading = false }) => {
@@ -45,6 +68,12 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading = fal
   }
 
   const totalRevenue = data.reduce((sum, item) => sum + (item.revenue || 0), 0);
+  
+  // Adicionar totalRevenue aos dados para o tooltip
+  const chartData = data.map(item => ({
+    ...item,
+    totalRevenue
+  }));
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
@@ -58,28 +87,20 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading = fal
           <ResponsiveContainer width="100%" height={250}>
             <PieChart>
               <Pie
-                data={data}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(((percent || 0) * 100) || 0).toFixed(0)}%`}
+                label={({ name, percent }) => `${name} ${(((percent || 0) * 100) || 0).toFixed(1).replace('.', ',')}%`}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="revenue"
               >
-                {data.map((entry, index) => (
+                {chartData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderRadius: '8px',
-                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                }}
-                formatter={(value: number) => [`R$ ${(value || 0).toLocaleString()}`, '']}
-              />
+              <Tooltip content={<CustomTooltip />} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -117,7 +138,7 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading = fal
                     {(((item.revenue || 0) / (totalRevenue || 1)) * 100).toFixed(1)}%
                   </td>
                   <td className="text-right py-2 font-medium">
-                    R$ {(item.revenue || 0).toLocaleString()}
+                    R$ {(item.revenue || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}
                   </td>
                 </tr>
               ))}

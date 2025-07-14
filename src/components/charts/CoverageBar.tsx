@@ -35,7 +35,7 @@ const CoverageBar: React.FC<CoverageBarProps> = ({ data, loading = false }) => {
 
   // Calcular percentual de cobertura
   const total = data.totalRevenue + data.totalExpenses;
-  const revenuePct = total > 0 ? data.totalRevenue / total : 0;
+  const coverageIndex = total > 0 ? (data.totalRevenue / (data.totalRevenue + data.totalExpenses)) * 100 : 0;
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
@@ -44,11 +44,22 @@ const CoverageBar: React.FC<CoverageBarProps> = ({ data, loading = false }) => {
       </h3>
       
       {/* Barra de cobertura */}
-      <div className="h-6 w-full rounded bg-gray-200">
+      <div className="h-6 w-full rounded bg-gray-200 flex">
         <div 
           className="h-full bg-green-500 rounded-l" 
-          style={{ width: `${revenuePct * 100}%` }}
+          style={{ width: `${coverageIndex}%` }}
         />
+        <div 
+          className="h-full bg-red-500 rounded-r" 
+          style={{ width: `${100 - coverageIndex}%` }}
+        />
+      </div>
+      
+      {/* Índice de Cobertura */}
+      <div className="mt-2 text-center">
+        <span className="text-sm font-medium text-gray-700">
+          Índice de Cobertura: {coverageIndex.toFixed(1)}%
+        </span>
       </div>
       
       {/* Legenda */}
