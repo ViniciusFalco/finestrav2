@@ -23,6 +23,17 @@ export interface AccumulatedSummary {
   cumHistoricalAvg?: number;
 }
 
+export interface PeriodTotals {
+  totalRevenue: number;
+  totalExpenses: number;
+  totalProfit: number;
+}
+
+export interface TopProduct {
+  product: string;
+  revenue: number;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -33,8 +44,9 @@ export function useDashboardData(filters: DashboardFilter) {
   const [data, setData] = useState<{
     sales: DailySummary[];
     accumulated: AccumulatedSummary[];
+    periodTotals: PeriodTotals;
     allProducts: Product[];
-    topProducts: Array<{ name: string; sales: number }>;
+    topProducts: TopProduct[];
     salesByPlatform: Array<{ platform: string; sales: number }>;
     salesByWeekday: Array<{ day: string; sales: number }>;
     salesByHour: Array<{ hour: number; sales: number }>;
@@ -43,6 +55,7 @@ export function useDashboardData(filters: DashboardFilter) {
   }>({
     sales: [],
     accumulated: [],
+    periodTotals: { totalRevenue: 0, totalExpenses: 0, totalProfit: 0 },
     allProducts: [],
     topProducts: [],
     salesByPlatform: [],
@@ -81,10 +94,12 @@ export function useDashboardData(filters: DashboardFilter) {
           // Transformar dados de vendas em formato para gráficos
           const dailyData = transformSalesToDailySummary(sales || []);
           const accumulatedData = transformToAccumulatedSummary(dailyData);
+          const periodTotals = calculatePeriodTotals(dailyData);
           
           setData({ 
             sales: dailyData, 
             accumulated: accumulatedData,
+            periodTotals,
             allProducts: allProducts || [],
             // Dados mockados para outros gráficos por enquanto
             topProducts: generateMockTopProducts(),
@@ -157,14 +172,29 @@ function transformToAccumulatedSummary(dailyData: DailySummary[]): AccumulatedSu
   });
 }
 
+// Função para calcular totais do período
+function calculatePeriodTotals(dailyData: DailySummary[]): PeriodTotals {
+  const totals = dailyData.reduce(
+    (acc, item) => {
+      acc.totalRevenue += item.revenue;
+      acc.totalExpenses += item.expenses;
+      acc.totalProfit += item.profit;
+      return acc;
+    },
+    { totalRevenue: 0, totalExpenses: 0, totalProfit: 0 }
+  );
+  
+  return totals;
+}
+
 // Funções para gerar dados mockados para outros gráficos
-function generateMockTopProducts() {
+function generateMockTopProducts(): TopProduct[] {
   return [
-    { name: 'Produto A', sales: 150 },
-    { name: 'Produto B', sales: 120 },
-    { name: 'Produto C', sales: 100 },
-    { name: 'Produto D', sales: 80 },
-    { name: 'Produto E', sales: 60 }
+    { product: 'Produto A', revenue: 15000 },
+    { product: 'Produto B', revenue: 12000 },
+    { product: 'Produto C', revenue: 10000 },
+    { product: 'Produto D', revenue: 8000 },
+    { product: 'Produto E', revenue: 6000 }
   ];
 }
 

@@ -82,7 +82,7 @@ export default function DashboardClient() {
 
           <Card className="shadow-soft">
             <CardContent className="p-6">
-              <BalanceChart data={data.balanceData || []} loading={loading} />
+              <BalanceChart data={data.periodTotals} loading={loading} />
             </CardContent>
           </Card>
 
