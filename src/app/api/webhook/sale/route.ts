@@ -11,14 +11,14 @@ interface SaleWebhookBody {
   netAmount: number;
 }
 
-// Criar cliente Supabase com service role key para bypass RLS
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function POST(request: NextRequest) {
   try {
+    // Criar cliente Supabase com service role key para bypass RLS (lazy-load)
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
     // 1. Validar webhook secret
     const webhookSecret = request.headers.get('x-webhook-secret');
     const expectedSecret = process.env.WEBHOOK_SECRET;
