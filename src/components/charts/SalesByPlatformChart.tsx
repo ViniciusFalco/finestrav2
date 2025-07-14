@@ -17,6 +17,32 @@ interface SalesByPlatformChartProps {
   loading?: boolean;
 }
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-medium text-gray-900 mb-2">{`Plataforma: ${label}`}</p>
+        <div className="space-y-1 text-sm">
+          <p className="text-green-600">
+            <span className="font-medium">Receita:</span> R$ {(data.revenue || 0).toLocaleString()}
+          </p>
+          <p className="text-blue-600">
+            <span className="font-medium">Quantidade:</span> {data.quantity || 0}
+          </p>
+          <p className="text-purple-600">
+            <span className="font-medium">Ticket médio:</span> R$ {((data.revenue || 0) / (data.quantity || 1)).toFixed(0)}
+          </p>
+          <p className="text-red-600">
+            <span className="font-medium">Reembolsos:</span> R$ {(data.refunds || 0).toLocaleString()}
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const SalesByPlatformChart: React.FC<SalesByPlatformChartProps> = ({ data, loading = false }) => {
   if (loading) {
     return (
@@ -44,9 +70,9 @@ const SalesByPlatformChart: React.FC<SalesByPlatformChartProps> = ({ data, loadi
     );
   }
 
-  const totalQuantity = data.reduce((sum, item) => sum + item.quantity, 0);
-  const totalRefunds = data.reduce((sum, item) => sum + item.refunds, 0);
-  const totalRevenue = data.reduce((sum, item) => sum + item.revenue, 0);
+  const totalQuantity = data.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  const totalRefunds = data.reduce((sum, item) => sum + (item.refunds || 0), 0);
+  const totalRevenue = data.reduce((sum, item) => sum + (item.revenue || 0), 0);
   const averageTicket = totalQuantity > 0 ? totalRevenue / totalQuantity : 0;
 
   return (
@@ -70,13 +96,13 @@ const SalesByPlatformChart: React.FC<SalesByPlatformChartProps> = ({ data, loadi
         <div className="bg-red-50 p-4 rounded-lg">
           <div className="text-sm text-red-600 font-medium">Reembolsos</div>
           <div className="text-lg font-bold text-red-900">
-            R$ {totalRefunds.toLocaleString()}
+            R$ {(totalRefunds || 0).toLocaleString()}
           </div>
         </div>
         <div className="bg-purple-50 p-4 rounded-lg">
           <div className="text-sm text-purple-600 font-medium">Receita Total</div>
           <div className="text-lg font-bold text-purple-900">
-            R$ {totalRevenue.toLocaleString()}
+            R$ {(totalRevenue || 0).toLocaleString()}
           </div>
         </div>
       </div>
@@ -98,19 +124,7 @@ const SalesByPlatformChart: React.FC<SalesByPlatformChartProps> = ({ data, loadi
             axisLine={false}
             tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
           />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            }}
-            formatter={(value: number, name: string) => [
-              name === 'revenue' ? `R$ ${value.toLocaleString()}` : value.toString(),
-              name === 'revenue' ? 'Receita' : name === 'refunds' ? 'Reembolsos' : 'Quantidade'
-            ]}
-            labelFormatter={(label) => `Plataforma: ${label}`}
-          />
+          <Tooltip content={<CustomTooltip />} />
           <Bar
             dataKey="revenue"
             fill="#10b981"
@@ -140,13 +154,13 @@ const SalesByPlatformChart: React.FC<SalesByPlatformChartProps> = ({ data, loadi
                   <td className="py-2 text-gray-900">{item.platform}</td>
                   <td className="py-2 text-right text-gray-600">{item.quantity}</td>
                   <td className="py-2 text-right font-medium text-green-600">
-                    R$ {item.revenue.toLocaleString()}
+                    R$ {(item.revenue || 0).toLocaleString()}
                   </td>
                   <td className="py-2 text-right text-red-600">
-                    R$ {item.refunds.toLocaleString()}
+                    R$ {(item.refunds || 0).toLocaleString()}
                   </td>
                   <td className="py-2 text-right text-gray-600">
-                    R$ {(item.revenue / item.quantity).toFixed(0)}
+                    R$ {((item.revenue || 0) / (item.quantity || 1)).toFixed(0)}
                   </td>
                 </tr>
               ))}

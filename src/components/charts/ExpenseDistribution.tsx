@@ -49,8 +49,8 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({
   const fixedExpenses = data.filter(item => item.type === 'fixed');
   const variableExpenses = data.filter(item => item.type === 'variable');
 
-  const totalFixed = fixedExpenses.reduce((sum, item) => sum + item.amount, 0);
-  const totalVariable = variableExpenses.reduce((sum, item) => sum + item.amount, 0);
+  const totalFixed = fixedExpenses.reduce((sum, item) => sum + (item.amount || 0), 0);
+  const totalVariable = variableExpenses.reduce((sum, item) => sum + (item.amount || 0), 0);
 
   const pieData = [
     { name: 'Despesas Fixas', value: totalFixed, color: '#ef4444' },
@@ -73,7 +73,7 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${name} ${(((percent || 0) * 100) || 0).toFixed(0)}%`}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="value"
@@ -89,7 +89,7 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({
                   borderRadius: '8px',
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                 }}
-                formatter={(value: number) => [`R$ ${value.toLocaleString()}`, '']}
+                formatter={(value: number) => [`R$ ${(value || 0).toLocaleString()}`, '']}
               />
             </PieChart>
           </ResponsiveContainer>
@@ -101,7 +101,7 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({
             {/* Despesas Fixas */}
             <div>
               <h4 className="text-sm font-semibold text-red-600 mb-2">
-                Despesas Fixas ({totalFixed.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })})
+                Despesas Fixas ({(totalFixed || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })})
               </h4>
               <div className="space-y-2">
                 {fixedExpenses.map((item, index) => (
@@ -109,10 +109,10 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({
                     <span className="text-gray-700">{item.category}</span>
                     <div className="flex items-center space-x-2">
                       <span className="text-gray-600">
-                        {item.percentage.toFixed(1)}%
+                        {(item.percentage || 0).toFixed(1)}%
                       </span>
                       <span className="font-medium">
-                        R$ {item.amount.toLocaleString()}
+                        R$ {(item.amount || 0).toLocaleString()}
                       </span>
                     </div>
                   </div>
@@ -123,7 +123,7 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({
             {/* Despesas Variáveis */}
             <div>
               <h4 className="text-sm font-semibold text-blue-600 mb-2">
-                Despesas Variáveis ({totalVariable.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })})
+                Despesas Variáveis ({(totalVariable || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })})
               </h4>
               <div className="space-y-2">
                 {variableExpenses.map((item, index) => (
@@ -131,10 +131,10 @@ const ExpenseDistributionChart: React.FC<ExpenseDistributionChartProps> = ({
                     <span className="text-gray-700">{item.category}</span>
                     <div className="flex items-center space-x-2">
                       <span className="text-gray-600">
-                        {item.percentage.toFixed(1)}%
+                        {(item.percentage || 0).toFixed(1)}%
                       </span>
                       <span className="font-medium">
-                        R$ {item.amount.toLocaleString()}
+                        R$ {(item.amount || 0).toLocaleString()}
                       </span>
                     </div>
                   </div>

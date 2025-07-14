@@ -17,6 +17,30 @@ interface SalesByWeekdayChartProps {
   loading?: boolean;
 }
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const quantity = data.quantity || 0;
+    const totalQuantity = data.totalQuantity || 0;
+    const percentage = totalQuantity > 0 ? (quantity / totalQuantity) * 100 : 0;
+    
+    return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-medium text-gray-900 mb-2">{`Dia: ${label}`}</p>
+        <div className="space-y-1 text-sm">
+          <p className="text-blue-600">
+            <span className="font-medium">Quantidade:</span> {quantity}
+          </p>
+          <p className="text-gray-600">
+            <span className="font-medium">Percentual:</span> {percentage.toFixed(1)}%
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading = false }) => {
   if (loading) {
     return (
@@ -44,8 +68,14 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
     );
   }
 
-  const totalQuantity = data.reduce((sum, item) => sum + item.quantity, 0);
-  const maxQuantity = Math.max(...data.map(item => item.quantity));
+  const totalQuantity = data.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  const maxQuantity = Math.max(...data.map(item => item.quantity || 0));
+  
+  // Adicionar totalQuantity aos dados para o tooltip
+  const chartData = data.map(item => ({
+    ...item,
+    totalQuantity
+  }));
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
@@ -60,7 +90,7 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
       </div>
 
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
+        <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis
             dataKey="weekday"
@@ -75,16 +105,7 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
             tickLine={false}
             axisLine={false}
           />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            }}
-            formatter={(value: number) => [value.toString(), 'Quantidade']}
-            labelFormatter={(label) => `Dia: ${label}`}
-          />
+          <Tooltip content={<CustomTooltip />} />
           <Bar
             dataKey="quantity"
             fill="#3b82f6"
@@ -98,8 +119,8 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
         <h4 className="text-sm font-semibold text-gray-900 mb-3">Detalhamento por Dia</h4>
         <div className="space-y-2">
           {data.map((item, index) => {
-            const percentage = totalQuantity > 0 ? (item.quantity / totalQuantity) * 100 : 0;
-            const isHighest = item.quantity === maxQuantity;
+            const percentage = totalQuantity > 0 ? ((item.quantity || 0) / totalQuantity) * 100 : 0;
+            const isHighest = (item.quantity || 0) === maxQuantity;
             
             return (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -114,7 +135,7 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
                     <div className="text-sm text-gray-600">{percentage.toFixed(1)}%</div>
-                    <div className="text-lg font-bold text-gray-900">{item.quantity}</div>
+                    <div className="text-lg font-bold text-gray-900">{item.quantity || 0}</div>
                   </div>
                   <div className="w-20 bg-gray-200 rounded-full h-2">
                     <div

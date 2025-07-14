@@ -44,7 +44,7 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading = fal
     );
   }
 
-  const totalRevenue = data.reduce((sum, item) => sum + item.revenue, 0);
+  const totalRevenue = data.reduce((sum, item) => sum + (item.revenue || 0), 0);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
@@ -62,7 +62,7 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading = fal
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${((percent || 0) * 100).toFixed(0)}%`}
+                label={({ name, percent }) => `${name} ${(((percent || 0) * 100) || 0).toFixed(0)}%`}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="revenue"
@@ -78,42 +78,51 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading = fal
                   borderRadius: '8px',
                   boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                 }}
-                formatter={(value: number) => [`R$ ${value.toLocaleString()}`, '']}
+                formatter={(value: number) => [`R$ ${(value || 0).toLocaleString()}`, '']}
               />
             </PieChart>
           </ResponsiveContainer>
         </div>
 
-        {/* Lista detalhada */}
+        {/* Tabela detalhada */}
         <div>
-          <div className="space-y-3">
-            <div className="text-center mb-4">
-              <div className="text-2xl font-bold text-gray-900">
-                R$ {totalRevenue.toLocaleString()}
-              </div>
-              <div className="text-sm text-gray-600">Receita Total</div>
+          <div className="text-center mb-4">
+            <div className="text-2xl font-bold text-gray-900">
+              R$ {(totalRevenue || 0).toLocaleString()}
             </div>
-            
-            {data.map((item, index) => (
-              <div key={index} className="flex justify-between items-center text-sm">
-                <div className="flex items-center space-x-2">
-                  <div 
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                  ></div>
-                  <span className="text-gray-700">{item.product}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-gray-600">
-                    {((item.revenue / totalRevenue) * 100).toFixed(1)}%
-                  </span>
-                  <span className="font-medium">
-                    R$ {item.revenue.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            ))}
+            <div className="text-sm text-gray-600">Receita Total</div>
           </div>
+          
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-200">
+                <th className="text-left py-2 font-medium text-gray-700">Produto</th>
+                <th className="text-right py-2 font-medium text-gray-700">%</th>
+                <th className="text-right py-2 font-medium text-gray-700">Receita</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((item, index) => (
+                <tr key={index} className="border-b border-gray-100">
+                  <td className="py-2">
+                    <div className="flex items-center space-x-2">
+                      <div 
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                      ></div>
+                      <span className="text-gray-700">{item.product}</span>
+                    </div>
+                  </td>
+                  <td className="text-right py-2 text-gray-600">
+                    {(((item.revenue || 0) / (totalRevenue || 1)) * 100).toFixed(1)}%
+                  </td>
+                  <td className="text-right py-2 font-medium">
+                    R$ {(item.revenue || 0).toLocaleString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

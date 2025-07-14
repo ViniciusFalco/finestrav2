@@ -18,6 +18,22 @@ interface DailyChartProps {
   loading?: boolean;
 }
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-medium text-gray-900 mb-2">{`Data: ${label}`}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} className="text-sm" style={{ color: entry.color }}>
+            {`${entry.name}: R$ ${entry.value?.toLocaleString()}`}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 const DailyChart: React.FC<DailyChartProps> = ({ data, loading = false }) => {
   if (loading) {
     return (
@@ -57,7 +73,7 @@ const DailyChart: React.FC<DailyChartProps> = ({ data, loading = false }) => {
         Resumo Diário
       </h3>
       <ResponsiveContainer width="100%" height={300}>
-        <LineChart data={chartData}>
+        <LineChart data={chartData} margin={{ right: 30 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis
             dataKey="date"
@@ -71,25 +87,17 @@ const DailyChart: React.FC<DailyChartProps> = ({ data, loading = false }) => {
             fontSize={12}
             tickLine={false}
             axisLine={false}
+            width={80}
             tickFormatter={(value) => `R$ ${value.toLocaleString()}`}
           />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            }}
-            formatter={(value: number) => [`R$ ${value.toLocaleString()}`, '']}
-            labelFormatter={(label) => `Data: ${label}`}
-          />
+          <Tooltip content={<CustomTooltip />} />
           <Legend />
           <Line
             type="monotone"
             dataKey="revenue"
             stroke="#10b981"
             strokeWidth={2}
-            dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+            dot={false}
             activeDot={{ r: 6 }}
             name="Receita"
           />
@@ -98,7 +106,7 @@ const DailyChart: React.FC<DailyChartProps> = ({ data, loading = false }) => {
             dataKey="expenses"
             stroke="#ef4444"
             strokeWidth={2}
-            dot={{ fill: '#ef4444', strokeWidth: 2, r: 4 }}
+            dot={false}
             activeDot={{ r: 6 }}
             name="Despesas"
           />
@@ -107,7 +115,7 @@ const DailyChart: React.FC<DailyChartProps> = ({ data, loading = false }) => {
             dataKey="profit"
             stroke="#3b82f6"
             strokeWidth={2}
-            dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+            dot={false}
             activeDot={{ r: 6 }}
             name="Lucro"
           />
@@ -116,7 +124,7 @@ const DailyChart: React.FC<DailyChartProps> = ({ data, loading = false }) => {
             dataKey="refunds"
             stroke="#f59e0b"
             strokeWidth={2}
-            dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
+            dot={false}
             activeDot={{ r: 6 }}
             name="Reembolsos"
           />

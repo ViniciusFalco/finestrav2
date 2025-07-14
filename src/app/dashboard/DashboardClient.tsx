@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { DashboardLayout } from '@/components/DashboardLayout';
 import DailyChart from '@/components/charts/DailyChart';
 import AccumulatedChart from '@/components/charts/AccumulatedChart';
-import BalanceChart from '@/components/charts/BalanceChart';
+import CoverageBar from '@/components/charts/CoverageBar';
 import ExpenseDistributionChart from '@/components/charts/ExpenseDistribution';
 import TopProductsChart from '@/components/charts/TopProductsChart';
 import SalesByPlatformChart from '@/components/charts/SalesByPlatformChart';
@@ -82,7 +82,7 @@ export default function DashboardClient() {
 
           <Card className="shadow-soft">
             <CardContent className="p-6">
-              <BalanceChart data={data.periodTotals} loading={loading} />
+              <CoverageBar data={data.periodTotals} loading={loading} />
             </CardContent>
           </Card>
 

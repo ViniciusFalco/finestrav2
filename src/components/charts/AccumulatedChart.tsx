@@ -18,6 +18,22 @@ interface AccumulatedChartProps {
   loading?: boolean;
 }
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-medium text-gray-900 mb-2">{`Data: ${label}`}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} className="text-sm" style={{ color: entry.color }}>
+            {`${entry.name}: R$ ${entry.value?.toLocaleString()}`}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
+
 const AccumulatedChart: React.FC<AccumulatedChartProps> = ({ data, loading = false }) => {
   if (loading) {
     return (
@@ -57,7 +73,7 @@ const AccumulatedChart: React.FC<AccumulatedChartProps> = ({ data, loading = fal
         Resumo Acumulado
       </h3>
       <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={chartData}>
+        <AreaChart data={chartData} margin={{ right: 30 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis
             dataKey="date"
@@ -71,18 +87,10 @@ const AccumulatedChart: React.FC<AccumulatedChartProps> = ({ data, loading = fal
             fontSize={12}
             tickLine={false}
             axisLine={false}
+            width={80}
             tickFormatter={(value) => `R$ ${value.toLocaleString()}`}
           />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            }}
-            formatter={(value: number) => [`R$ ${value.toLocaleString()}`, '']}
-            labelFormatter={(label) => `Data: ${label}`}
-          />
+          <Tooltip content={<CustomTooltip />} />
           <Legend />
           <Area
             type="monotone"

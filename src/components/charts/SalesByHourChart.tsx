@@ -17,6 +17,30 @@ interface SalesByHourChartProps {
   loading?: boolean;
 }
 
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    const quantity = data.quantity || 0;
+    const totalQuantity = data.totalQuantity || 0;
+    const percentage = totalQuantity > 0 ? (quantity / totalQuantity) * 100 : 0;
+    
+    return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-medium text-gray-900 mb-2">{`Horário: ${label}`}</p>
+        <div className="space-y-1 text-sm">
+          <p className="text-yellow-600">
+            <span className="font-medium">Quantidade:</span> {quantity}
+          </p>
+          <p className="text-gray-600">
+            <span className="font-medium">Percentual:</span> {percentage.toFixed(1)}%
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
 const SalesByHourChart: React.FC<SalesByHourChartProps> = ({ data, loading = false }) => {
   if (loading) {
     return (
@@ -44,8 +68,14 @@ const SalesByHourChart: React.FC<SalesByHourChartProps> = ({ data, loading = fal
     );
   }
 
-  const totalQuantity = data.reduce((sum, item) => sum + item.quantity, 0);
-  const maxQuantity = Math.max(...data.map(item => item.quantity));
+  const totalQuantity = data.reduce((sum, item) => sum + (item.quantity || 0), 0);
+  const maxQuantity = Math.max(...data.map(item => item.quantity || 0));
+  
+  // Adicionar totalQuantity aos dados para o tooltip
+  const chartData = data.map(item => ({
+    ...item,
+    totalQuantity
+  }));
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
@@ -60,7 +90,7 @@ const SalesByHourChart: React.FC<SalesByHourChartProps> = ({ data, loading = fal
       </div>
 
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
+        <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis
             dataKey="hourRange"
@@ -75,16 +105,7 @@ const SalesByHourChart: React.FC<SalesByHourChartProps> = ({ data, loading = fal
             tickLine={false}
             axisLine={false}
           />
-          <Tooltip
-            contentStyle={{
-              backgroundColor: 'white',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-            }}
-            formatter={(value: number) => [value.toString(), 'Quantidade']}
-            labelFormatter={(label) => `Horário: ${label}`}
-          />
+          <Tooltip content={<CustomTooltip />} />
           <Bar
             dataKey="quantity"
             fill="#f59e0b"
@@ -98,8 +119,8 @@ const SalesByHourChart: React.FC<SalesByHourChartProps> = ({ data, loading = fal
         <h4 className="text-sm font-semibold text-gray-900 mb-3">Detalhamento por Horário</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           {data.map((item, index) => {
-            const percentage = totalQuantity > 0 ? (item.quantity / totalQuantity) * 100 : 0;
-            const isHighest = item.quantity === maxQuantity;
+            const percentage = totalQuantity > 0 ? ((item.quantity || 0) / totalQuantity) * 100 : 0;
+            const isHighest = (item.quantity || 0) === maxQuantity;
             
             return (
               <div key={index} className="p-3 bg-gray-50 rounded-lg">
@@ -113,7 +134,7 @@ const SalesByHourChart: React.FC<SalesByHourChartProps> = ({ data, loading = fal
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="text-right">
-                    <div className="text-lg font-bold text-gray-900">{item.quantity}</div>
+                    <div className="text-lg font-bold text-gray-900">{item.quantity || 0}</div>
                     <div className="text-sm text-gray-600">{percentage.toFixed(1)}%</div>
                   </div>
                   <div className="flex-1 bg-gray-200 rounded-full h-2">
