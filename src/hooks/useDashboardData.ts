@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 // Tipos para os dados do dashboard
 export interface DailySummary {
@@ -108,6 +108,16 @@ const mockSalesByHour: SalesByHour[] = [
   { hourRange: '15-18h', quantity: 40 },
   { hourRange: '18-21h', quantity: 45 },
   { hourRange: '21-24h', quantity: 20 },
+];
+
+// Dados mockados de produtos para o multi-select
+export const mockAllProducts = [
+  { id: 'produto-a', name: 'Produto A' },
+  { id: 'produto-b', name: 'Produto B' },
+  { id: 'produto-c', name: 'Produto C' },
+  { id: 'produto-d', name: 'Produto D' },
+  { id: 'produto-e', name: 'Produto E' },
+  { id: 'produto-f', name: 'Produto F' },
 ];
 
 // Função para obter dados diários
@@ -244,11 +254,13 @@ export const getSalesByHour = async (
 };
 
 // Hook principal para usar os dados do dashboard
-export const useDashboardData = (
-  startDate: string,
-  endDate: string,
-  productIds?: string[]
-) => {
+export const useDashboardData = ({ 
+  dateRange, 
+  productIds 
+}: { 
+  dateRange: { start: Date; end: Date }; 
+  productIds: string[] 
+}) => {
   const [dailyData, setDailyData] = useState<DailySummary[]>([]);
   const [accumulatedData, setAccumulatedData] = useState<AccumulatedSummary[]>([]);
   const [periodTotals, setPeriodTotals] = useState<PeriodTotals>({
@@ -265,49 +277,52 @@ export const useDashboardData = (
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const [
-          daily, 
-          accumulated, 
-          totals, 
-          distribution,
-          topProductsData,
-          platformData,
-          weekdayData,
-          hourData
-        ] = await Promise.all([
-          getDailySummary(startDate, endDate, productIds),
-          getAccumulatedSummary(startDate, endDate, productIds),
-          getPeriodTotals(startDate, endDate, productIds),
-          getExpenseDistribution(startDate, endDate),
-          getTopProducts(startDate, endDate, productIds),
-          getSalesByPlatform(startDate, endDate, productIds),
-          getSalesByWeekday(startDate, endDate, productIds),
-          getSalesByHour(startDate, endDate, productIds),
-        ]);
-        
-        setDailyData(daily);
-        setAccumulatedData(accumulated);
-        setPeriodTotals(totals);
-        setExpenseDistribution(distribution);
-        setTopProducts(topProductsData);
-        setSalesByPlatform(platformData);
-        setSalesByWeekday(weekdayData);
-        setSalesByHour(hourData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const startDate = dateRange.start.toISOString().split('T')[0];
+      const endDate = dateRange.end.toISOString().split('T')[0];
+      
+      const [
+        daily, 
+        accumulated, 
+        totals, 
+        distribution,
+        topProductsData,
+        platformData,
+        weekdayData,
+        hourData
+      ] = await Promise.all([
+        getDailySummary(startDate, endDate, productIds),
+        getAccumulatedSummary(startDate, endDate, productIds),
+        getPeriodTotals(startDate, endDate, productIds),
+        getExpenseDistribution(startDate, endDate),
+        getTopProducts(startDate, endDate, productIds),
+        getSalesByPlatform(startDate, endDate, productIds),
+        getSalesByWeekday(startDate, endDate, productIds),
+        getSalesByHour(startDate, endDate, productIds),
+      ]);
+      
+      setDailyData(daily);
+      setAccumulatedData(accumulated);
+      setPeriodTotals(totals);
+      setExpenseDistribution(distribution);
+      setTopProducts(topProductsData);
+      setSalesByPlatform(platformData);
+      setSalesByWeekday(weekdayData);
+      setSalesByHour(hourData);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao carregar dados');
+    } finally {
+      setLoading(false);
+    }
+  }, [dateRange.start, dateRange.end, productIds]);
 
+  useEffect(() => {
     fetchData();
-  }, [startDate, endDate, productIds]);
+  }, [fetchData]);
 
   return {
     dailyData,
@@ -318,7 +333,9 @@ export const useDashboardData = (
     salesByPlatform,
     salesByWeekday,
     salesByHour,
+    allProducts: mockAllProducts,
     loading,
     error,
+    refreshData: fetchData,
   };
 }; 
