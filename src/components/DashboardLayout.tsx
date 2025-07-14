@@ -1,7 +1,7 @@
 'use client';
 import { ReactNode, useState } from 'react';
 import Link from 'next/link';
-import { supabase } from '@/lib/supabaseClient';
+import { supabaseBrowser } from '@/lib/supabaseClient.browser';
 import { useRouter } from 'next/navigation';
 import { 
   BarChart3, 
@@ -33,9 +33,10 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children, periodTotals }: DashboardLayoutProps) {
   const [open, setOpen] = useState(true);
   const router = useRouter();
+  const supabase = supabaseBrowser();
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    await supabase.auth.signOut({ scope: 'global' });
     router.push('/login');
   };
 

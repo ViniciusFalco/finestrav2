@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabaseClient'
+import { supabaseBrowser } from '@/lib/supabaseClient.browser'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,6 +16,7 @@ export default function LoginPage() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
+  const supabase = supabaseBrowser()
 
   useEffect(() => {
     // Debug: verificar se o Supabase está sendo inicializado

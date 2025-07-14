@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabaseBrowser } from '@/lib/supabaseClient.browser';
 
 export interface Sale {
   id: string;
@@ -36,6 +36,7 @@ export const useSales = (startDate: string, endDate: string) => {
   const [sales, setSales] = useState<Sale[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabase = supabaseBrowser();
 
   useEffect(() => {
     const fetchSales = async () => {
@@ -68,6 +69,7 @@ export const useSales = (startDate: string, endDate: string) => {
 
 // Função para criar venda
 export const createSale = async (data: CreateSaleData): Promise<Sale> => {
+  const supabase = supabaseBrowser();
   const { data: sale, error } = await supabase
     .from('sales')
     .insert([{ ...data, refunds: data.refunds || 0 }])
@@ -80,6 +82,7 @@ export const createSale = async (data: CreateSaleData): Promise<Sale> => {
 
 // Função para atualizar venda
 export const updateSale = async (id: string, data: UpdateSaleData): Promise<Sale> => {
+  const supabase = supabaseBrowser();
   const { data: sale, error } = await supabase
     .from('sales')
     .update({ ...data, updated_at: new Date().toISOString() })
@@ -93,6 +96,7 @@ export const updateSale = async (id: string, data: UpdateSaleData): Promise<Sale
 
 // Função para excluir venda
 export const deleteSale = async (id: string): Promise<void> => {
+  const supabase = supabaseBrowser();
   const { error } = await supabase
     .from('sales')
     .delete()

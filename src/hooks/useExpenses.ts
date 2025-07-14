@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import { supabaseBrowser } from '@/lib/supabaseClient.browser';
 
 export interface Expense {
   id: string;
@@ -33,6 +33,7 @@ export const useExpenses = (startDate: string, endDate: string) => {
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const supabase = supabaseBrowser();
 
   useEffect(() => {
     const fetchExpenses = async () => {
@@ -65,6 +66,7 @@ export const useExpenses = (startDate: string, endDate: string) => {
 
 // Função para criar despesa
 export const createExpense = async (data: CreateExpenseData): Promise<Expense> => {
+  const supabase = supabaseBrowser();
   const { data: expense, error } = await supabase
     .from('expenses')
     .insert([data])
@@ -77,6 +79,7 @@ export const createExpense = async (data: CreateExpenseData): Promise<Expense> =
 
 // Função para atualizar despesa
 export const updateExpense = async (id: string, data: UpdateExpenseData): Promise<Expense> => {
+  const supabase = supabaseBrowser();
   const { data: expense, error } = await supabase
     .from('expenses')
     .update({ ...data, updated_at: new Date().toISOString() })
@@ -90,6 +93,7 @@ export const updateExpense = async (id: string, data: UpdateExpenseData): Promis
 
 // Função para excluir despesa
 export const deleteExpense = async (id: string): Promise<void> => {
+  const supabase = supabaseBrowser();
   const { error } = await supabase
     .from('expenses')
     .delete()
