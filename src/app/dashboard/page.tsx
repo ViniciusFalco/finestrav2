@@ -11,6 +11,9 @@ import SalesByPlatformChart from '@/components/charts/SalesByPlatformChart';
 import SalesByWeekdayChart from '@/components/charts/SalesByWeekdayChart';
 import SalesByHourChart from '@/components/charts/SalesByHourChart';
 import { useDashboardData } from '@/hooks/useDashboardData';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Filter, Calendar, Package } from 'lucide-react';
 
 export default function DashboardPage() {
   // Estado para filtros
@@ -35,110 +38,150 @@ export default function DashboardPage() {
   if (error) {
     return (
       <DashboardLayout>
-        <div className="p-6">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-800">Erro ao carregar dados: {error}</p>
-          </div>
-        </div>
+        <Card className="border-red-200 bg-red-50">
+          <CardContent className="p-6">
+            <p className="text-red-800 font-medium">Erro ao carregar dados: {error}</p>
+          </CardContent>
+        </Card>
       </DashboardLayout>
     );
   }
 
   return (
     <DashboardLayout periodTotals={periodTotals}>
-      <div className="p-6 space-y-6">
+      <div className="space-y-6">
         {/* Filtros */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Filtros</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Data Inicial
-              </label>
-              <input
-                type="date"
-                id="startDate"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
+        <Card className="shadow-soft">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Filter className="h-5 w-5 text-primary-600" />
+              Filtros
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <label htmlFor="startDate" className="text-sm font-medium text-neutral-700 flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  Data Inicial
+                </label>
+                <Input
+                  type="date"
+                  id="startDate"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="endDate" className="text-sm font-medium text-neutral-700 flex items-center gap-1">
+                  <Calendar className="h-4 w-4" />
+                  Data Final
+                </label>
+                <Input
+                  type="date"
+                  id="endDate"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="products" className="text-sm font-medium text-neutral-700 flex items-center gap-1">
+                  <Package className="h-4 w-4" />
+                  Produtos
+                </label>
+                <select
+                  id="products"
+                  value={selectedProducts.length > 0 ? 'selected' : 'all'}
+                  onChange={(e) => {
+                    if (e.target.value === 'all') {
+                      setSelectedProducts([]);
+                    } else {
+                      // Por enquanto, simula seleção de produtos específicos
+                      setSelectedProducts(['produto-a', 'produto-b']);
+                    }
+                  }}
+                  className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="all">Todos os produtos</option>
+                  <option value="selected">Produtos específicos</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
-                Data Final
-              </label>
-              <input
-                type="date"
-                id="endDate"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label htmlFor="products" className="block text-sm font-medium text-gray-700 mb-1">
-                Produtos
-              </label>
-              <select
-                id="products"
-                value={selectedProducts.length > 0 ? 'selected' : 'all'}
-                onChange={(e) => {
-                  if (e.target.value === 'all') {
-                    setSelectedProducts([]);
-                  } else {
-                    // Por enquanto, simula seleção de produtos específicos
-                    setSelectedProducts(['produto-a', 'produto-b']);
-                  }
-                }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">Todos os produtos</option>
-                <option value="selected">Produtos específicos</option>
-              </select>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Resumo Diário */}
           <div className="lg:col-span-2">
-            <DailyChart data={dailyData} loading={loading} />
+            <Card className="shadow-soft">
+              <CardContent className="p-6">
+                <DailyChart data={dailyData} loading={loading} />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Resumo Acumulado */}
           <div className="lg:col-span-2">
-            <AccumulatedChart data={accumulatedData} loading={loading} />
+            <Card className="shadow-soft">
+              <CardContent className="p-6">
+                <AccumulatedChart data={accumulatedData} loading={loading} />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Cobertura de Receita vs Despesa */}
           <div>
-            <BalanceChart data={periodTotals} loading={loading} />
+            <Card className="shadow-soft">
+              <CardContent className="p-6">
+                <BalanceChart data={periodTotals} loading={loading} />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Distribuição de Despesas */}
           <div>
-            <ExpenseDistributionChart data={expenseDistribution} loading={loading} />
+            <Card className="shadow-soft">
+              <CardContent className="p-6">
+                <ExpenseDistributionChart data={expenseDistribution} loading={loading} />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Top Produtos */}
           <div>
-            <TopProductsChart data={topProducts} loading={loading} />
+            <Card className="shadow-soft">
+              <CardContent className="p-6">
+                <TopProductsChart data={topProducts} loading={loading} />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Vendas por Plataforma */}
           <div>
-            <SalesByPlatformChart data={salesByPlatform} loading={loading} />
+            <Card className="shadow-soft">
+              <CardContent className="p-6">
+                <SalesByPlatformChart data={salesByPlatform} loading={loading} />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Vendas por Dia da Semana */}
           <div>
-            <SalesByWeekdayChart data={salesByWeekday} loading={loading} />
+            <Card className="shadow-soft">
+              <CardContent className="p-6">
+                <SalesByWeekdayChart data={salesByWeekday} loading={loading} />
+              </CardContent>
+            </Card>
           </div>
 
           {/* Vendas por Horário */}
           <div>
-            <SalesByHourChart data={salesByHour} loading={loading} />
+            <Card className="shadow-soft">
+              <CardContent className="p-6">
+                <SalesByHourChart data={salesByHour} loading={loading} />
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
