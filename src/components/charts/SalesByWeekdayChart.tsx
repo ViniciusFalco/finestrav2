@@ -34,10 +34,10 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     const totalQuantity = data.totalQuantity || 0;
     const percentage = totalQuantity > 0 ? (quantity / totalQuantity) * 100 : 0;
     const avgTicket = 150; // Mock - seria calculado com dados reais
-    
+    const labelPt = weekdayMap[label] || label;
     return (
       <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
-        <p className="font-medium text-gray-900 mb-2">{`Dia: ${label}`}</p>
+        <p className="font-medium text-gray-900 mb-2">{`Dia: ${labelPt}`}</p>
         <div className="space-y-1 text-sm">
           <p className="text-blue-600">
             <span className="font-medium">Quantidade:</span> {quantity}
@@ -139,11 +139,11 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
           {data.map((item, index) => {
             const percentage = totalQuantity > 0 ? ((item.quantity || 0) / totalQuantity) * 100 : 0;
             const isHighest = (item.quantity || 0) === maxQuantity;
-            
+            const weekdayPt = weekdayMap[item.weekday] || item.weekday;
             return (
               <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                 <div className="flex items-center space-x-3">
-                  <span className="text-gray-700 font-medium">{item.weekday}</span>
+                  <span className="text-gray-700 font-medium">{weekdayPt}</span>
                   {isHighest && (
                     <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">
                       Mais vendas

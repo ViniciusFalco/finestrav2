@@ -9,6 +9,7 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Cell,
 } from 'recharts';
 import { SalesByPlatform } from '@/hooks/useDashboardData';
 
@@ -110,7 +111,7 @@ const SalesByPlatformChart: React.FC<SalesByPlatformChartProps> = ({ data, loadi
       </div>
 
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={data}>
+        <BarChart data={data} barCategoryGap={40}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis
             dataKey="platform"
@@ -127,15 +128,11 @@ const SalesByPlatformChart: React.FC<SalesByPlatformChartProps> = ({ data, loadi
             tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`}
           />
           <Tooltip content={<CustomTooltip />} />
-          {data.map((entry, index) => (
-            <Bar
-              key={index}
-              dataKey="revenue"
-              fill={COLORS[index % COLORS.length]}
-              radius={[4, 4, 0, 0]}
-              name="revenue"
-            />
-          ))}
+          <Bar dataKey="revenue" radius={[4, 4, 0, 0]} name="revenue">
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Bar>
         </BarChart>
       </ResponsiveContainer>
 

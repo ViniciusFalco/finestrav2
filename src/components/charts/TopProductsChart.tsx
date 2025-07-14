@@ -91,7 +91,11 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading = fal
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ name, percent }) => `${name} ${(((percent || 0) * 100) || 0).toFixed(1).replace('.', ',')}%`}
+                label={({ name, percent }) => {
+                  const pct = ((percent || 0) * 100);
+                  const pctStr = pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1).replace('.', ',');
+                  return `${name} ${pctStr}%`;
+                }}
                 outerRadius={80}
                 fill="#8884d8"
                 dataKey="revenue"
@@ -135,7 +139,10 @@ const TopProductsChart: React.FC<TopProductsChartProps> = ({ data, loading = fal
                     </div>
                   </td>
                   <td className="text-right py-2 text-gray-600">
-                    {(((item.revenue || 0) / (totalRevenue || 1)) * 100).toFixed(1)}%
+                    {(() => {
+                      const pct = ((item.revenue || 0) / (totalRevenue || 1)) * 100;
+                      return pct % 1 === 0 ? pct.toFixed(0) : pct.toFixed(1).replace('.', ',');
+                    })()}%
                   </td>
                   <td className="text-right py-2 font-medium">
                     R$ {(item.revenue || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}
