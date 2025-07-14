@@ -36,17 +36,19 @@ const BalanceChart: React.FC<BalanceChartProps> = ({ data, loading = false }) =>
     {
       name: 'Receita',
       value: data.totalRevenue,
-      color: '#10b981',
     },
     {
       name: 'Despesas',
       value: data.totalExpenses,
-      color: '#ef4444',
     },
   ];
 
   const coverage = data.totalRevenue > 0 ? (data.totalExpenses / data.totalRevenue) * 100 : 0;
   const isHealthy = coverage <= 80; // Considera saudável se despesas <= 80% da receita
+
+  // Debug: verificar se os dados estão chegando
+  console.log('BalanceChart data:', data);
+  console.log('BalanceChart chartData:', chartData);
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm border">
@@ -75,8 +77,8 @@ const BalanceChart: React.FC<BalanceChartProps> = ({ data, loading = false }) =>
         </p>
       </div>
 
-      <ResponsiveContainer width="100%" height={200}>
-        <BarChart data={chartData} layout="horizontal">
+      <ResponsiveContainer width="100%" height={300}>
+        <BarChart data={chartData} layout="horizontal" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
           <XAxis
             type="number"
@@ -108,6 +110,7 @@ const BalanceChart: React.FC<BalanceChartProps> = ({ data, loading = false }) =>
             dataKey="value"
             fill="#10b981"
             radius={[0, 4, 4, 0]}
+            barSize={30}
           />
         </BarChart>
       </ResponsiveContainer>
