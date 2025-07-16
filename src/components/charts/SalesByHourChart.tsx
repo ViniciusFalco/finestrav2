@@ -17,7 +17,19 @@ interface SalesByHourChartProps {
   loading?: boolean;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface TooltipEntry {
+  quantity: number;
+  totalQuantity: number;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: { payload: TooltipEntry }[];
+  label?: string;
+}
+
+const CustomTooltip = (props: CustomTooltipProps) => {
+  const { active, payload, label } = props;
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const quantity = data.quantity || 0;

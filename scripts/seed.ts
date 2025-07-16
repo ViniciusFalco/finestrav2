@@ -37,56 +37,159 @@ const categories = [
   { name: 'Operacional', type: 'fixed', subcategories: ['Salários', 'Escritório', 'Equipamentos'] }
 ];
 
-
-
-// Função para gerar data aleatória no último mês
-function getRandomDateInLastMonth(): string {
-  const now = new Date();
-  const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0);
+// Função para obter ou criar usuário de teste
+async function getOrCreateTestUser(): Promise<string> {
+  console.log('🔍 Verificando usuário de teste...');
   
-  const randomTime = lastMonth.getTime() + Math.random() * (endOfLastMonth.getTime() - lastMonth.getTime());
+  try {
+    // 1. Tentar buscar um usuário existente pelo email
+    const { data: existingUser, error: searchError } = await supabase.auth.admin.listUsers();
+    
+    if (searchError) {
+      console.error('❌ Erro ao buscar usuários:', searchError);
+    } else if (existingUser.users && existingUser.users.length > 0) {
+      // Buscar pelo email real do usuário
+      const testUser = existingUser.users.find(u => u.email === 'viniciusasso@gmail.com');
+      if (testUser) {
+        console.log('✅ Usando usuário existente:', testUser.id);
+        return testUser.id;
+      }
+    }
+    
+    // 2. Se não existir, criar um novo usuário
+    console.log('👤 Criando novo usuário de teste...');
+    const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+      email: 'viniciusasso@gmail.com',
+      password: '123456',
+      email_confirm: true
+    });
+    
+    if (createError) {
+      console.error('❌ Erro ao criar usuário:', createError);
+      throw new Error('Não foi possível criar usuário de teste');
+    }
+    
+    if (!newUser.user?.id) {
+      throw new Error('Usuário criado mas ID não encontrado');
+    }
+    
+    console.log('✅ Novo usuário criado:', newUser.user.id);
+    return newUser.user.id;
+    
+  } catch (error: unknown) {
+    // Se o erro for de email já existente, tentar buscar o usuário
+    const errorMessage = error instanceof Error ? error.message : '';
+    const errorCode = (error as { code?: string })?.code;
+    
+    if (errorMessage.includes('already been registered') || errorCode === 'email_exists') {
+      console.log('🔄 Usuário já existe, buscando...');
+      
+      const { data: existingUser, error: searchError } = await supabase.auth.admin.listUsers();
+      
+      if (searchError) {
+        console.error('❌ Erro ao buscar usuários:', searchError);
+        throw new Error('Não foi possível buscar usuário existente');
+      }
+      
+      const testUser = existingUser.users?.find(u => u.email === 'viniciusasso@gmail.com');
+      if (testUser) {
+        console.log('✅ Usando usuário existente:', testUser.id);
+        return testUser.id;
+      }
+    }
+    
+    throw error;
+  }
+}
+
+// Função para gerar data aleatória nos últimos 7 dias
+function getRandomDateInLastWeek(): string {
+  const now = new Date();
+  const sevenDaysAgo = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+  
+  const randomTime = sevenDaysAgo.getTime() + Math.random() * (now.getTime() - sevenDaysAgo.getTime());
   const randomDate = new Date(randomTime);
   
   return randomDate.toISOString().split('T')[0];
 }
 
+// Função para gerar hora aleatória
+function getRandomTime(): string {
+  const hours = Math.floor(Math.random() * 24);
+  const minutes = Math.floor(Math.random() * 60);
+  const seconds = Math.floor(Math.random() * 60);
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
 // Função para gerar vendas aleatórias
-async function seedSales() {
+async function seedSales(testUserId: string) {
   console.log('🌱 Populando vendas...');
   
-  // Usar um UUID válido para o usuário de teste
-  const testUserId = '00000000-0000-0000-0000-000000000000';
-  
-  // Primeiro, criar produtos e plataformas
-  const { data: createdProducts } = await supabase
+  // Primeiro, verificar se já existem produtos e plataformas
+  const { data: existingProducts } = await supabase
     .from('products')
-    .insert(products.map(p => ({ user_id: testUserId, name: p.name })))
-    .select();
+    .select('id, name')
+    .eq('user_id', testUserId)
+    .limit(5);
     
-  const { data: createdPlatforms } = await supabase
+  const { data: existingPlatforms } = await supabase
     .from('platforms')
-    .insert(platforms.map(p => ({ user_id: testUserId, name: p.name })))
-    .select();
+    .select('id, name')
+    .eq('user_id', testUserId)
+    .limit(5);
+
+  let createdProducts = existingProducts;
+  let createdPlatforms = existingPlatforms;
+  
+  // Se não existem produtos, criar novos
+  if (!existingProducts || existingProducts.length === 0) {
+    console.log('📦 Criando produtos...');
+    const { data: newProducts, error: prodError } = await supabase
+      .from('products')
+      .insert(products.map(({ name }) => ({ name, user_id: testUserId })))
+      .select();
+      
+    if (prodError) {
+      console.error('❌ Erro ao criar produtos:', prodError);
+      return;
+    }
+    createdProducts = newProducts;
+  }
+  
+  // Se não existem plataformas, criar novas
+  if (!existingPlatforms || existingPlatforms.length === 0) {
+    console.log('🌐 Criando plataformas...');
+    const { data: newPlatforms, error: platError } = await supabase
+      .from('platforms')
+      .insert(platforms.map(p => ({ name: p.name, user_id: testUserId })))
+      .select();
+      
+    if (platError) {
+      console.error('❌ Erro ao criar plataformas:', platError);
+      return;
+    }
+    createdPlatforms = newPlatforms;
+  }
     
   if (!createdProducts || !createdPlatforms) {
-    console.error('❌ Erro ao criar produtos ou plataformas');
+    console.error('❌ Erro ao obter produtos ou plataformas');
     return;
   }
   
   const sales = [];
-  const userId = testUserId; // Usuário de teste
   
-  for (let i = 0; i < 100; i++) {
+  // Gerar 20 vendas nos últimos 7 dias
+  for (let i = 0; i < 20; i++) {
     const product = createdProducts[Math.floor(Math.random() * createdProducts.length)];
     const platform = createdPlatforms[Math.floor(Math.random() * createdPlatforms.length)];
     const quantity = Math.floor(Math.random() * 3) + 1;
-    const netAmount = products.find(p => p.name === product.name)!.price * quantity;
+    const netAmount = products.find(p => p.name === product.name)?.price || 100 * quantity;
     
     sales.push({
-      user_id: userId,
-      date: getRandomDateInLastMonth(),
-      time: new Date().toTimeString().split(' ')[0],
+      user_id: testUserId,
+      date: getRandomDateInLastWeek(),
+      time: getRandomTime(),
       product_id: product.id,
       platform_id: platform.id,
       quantity,
@@ -107,39 +210,50 @@ async function seedSales() {
 }
 
 // Função para gerar despesas aleatórias
-async function seedExpenses() {
+async function seedExpenses(testUserId: string) {
   console.log('🌱 Populando despesas...');
   
-  // Usar um UUID válido para o usuário de teste
-  const testUserId = '00000000-0000-0000-0000-000000000000';
-  
-  // Primeiro, criar categorias
-  const { data: createdCategories } = await supabase
+  // Primeiro, verificar se já existem categorias
+  const { data: existingCategories } = await supabase
     .from('categories')
-    .insert(categories.map(c => ({ 
-      user_id: testUserId, 
-      name: c.name, 
-      type: c.type 
-    })))
-    .select();
+    .select('id, name, type')
+    .eq('user_id', testUserId)
+    .limit(10);
+    
+  let createdCategories = existingCategories;
+  
+  // Se não existem categorias, criar novas
+  if (!existingCategories || existingCategories.length === 0) {
+    console.log('📂 Criando categorias...');
+    const { data: newCategories, error: catError } = await supabase
+      .from('categories')
+      .insert(categories.map(({ name, type }) => ({ name, type, user_id: testUserId })))
+      .select();
+      
+    if (catError) {
+      console.error('❌ Erro ao criar categorias:', catError);
+      return;
+    }
+    createdCategories = newCategories;
+  }
     
   if (!createdCategories) {
-    console.error('❌ Erro ao criar categorias');
+    console.error('❌ Erro ao obter categorias');
     return;
   }
   
   const expenses = [];
-  const userId = testUserId;
   
-  for (let i = 0; i < 40; i++) {
+  // Gerar 10 despesas nos últimos 7 dias
+  for (let i = 0; i < 10; i++) {
     const category = createdCategories[Math.floor(Math.random() * createdCategories.length)];
-    const originalCategory = categories.find(c => c.name === category.name)!;
-    const subcategory = originalCategory.subcategories[Math.floor(Math.random() * originalCategory.subcategories.length)];
+    const originalCategory = categories.find(c => c.name === category.name);
+    const subcategory = originalCategory?.subcategories[Math.floor(Math.random() * originalCategory.subcategories.length)] || 'Geral';
     const amount = Math.random() * 500 + 50; // Entre 50 e 550
     
     expenses.push({
-      user_id: userId,
-      date: getRandomDateInLastMonth(),
+      user_id: testUserId,
+      date: getRandomDateInLastWeek(),
       description: `Despesa ${i + 1} - ${subcategory}`,
       amount: Math.round(amount * 100) / 100,
       category_id: category.id
@@ -158,17 +272,15 @@ async function seedExpenses() {
 }
 
 // Função para gerar reembolsos
-async function seedRefunds() {
+async function seedRefunds(testUserId: string) {
   console.log('🌱 Populando reembolsos...');
-  
-  // Usar um UUID válido para o usuário de teste
-  const testUserId = '00000000-0000-0000-0000-000000000000';
   
   // Primeiro, buscar algumas vendas para criar reembolsos
   const { data: sales } = await supabase
     .from('sales')
     .select('id, product_id, platform_id, net_amount')
-    .limit(5);
+    .eq('user_id', testUserId)
+    .limit(3);
     
   if (!sales || sales.length === 0) {
     console.log('⚠️ Nenhuma venda encontrada para criar reembolsos');
@@ -176,18 +288,17 @@ async function seedRefunds() {
   }
   
   const refunds = [];
-  const userId = testUserId;
   
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 3; i++) {
     const sale = sales[i];
     const refundAmount = sale.net_amount * (Math.random() * 0.5 + 0.1); // 10% a 60% do valor
     
     refunds.push({
-      user_id: userId,
+      user_id: testUserId,
       sale_id: sale.id,
       product_id: sale.product_id,
       platform_id: sale.platform_id,
-      date: getRandomDateInLastMonth(),
+      date: getRandomDateInLastWeek(),
       amount: Math.round(refundAmount * 100) / 100
     });
   }
@@ -208,15 +319,20 @@ async function seedDatabase() {
   console.log('🚀 Iniciando seed do banco de dados...');
   
   try {
-    await seedSales();
-    await seedExpenses();
-    await seedRefunds();
+    // Obter ou criar usuário de teste
+    const testUserId = await getOrCreateTestUser();
+    
+    await seedSales(testUserId);
+    await seedExpenses(testUserId);
+    await seedRefunds(testUserId);
     
     console.log('✅ Seed concluído com sucesso!');
     console.log('📊 Dados inseridos:');
-    console.log('   - 100 vendas');
-    console.log('   - 40 despesas');
-    console.log('   - 5 reembolsos');
+    console.log('   - 20 vendas (últimos 7 dias)');
+    console.log('   - 10 despesas (últimos 7 dias)');
+    console.log('   - 3 reembolsos (últimos 7 dias)');
+    console.log('📅 Período: Últimos 7 dias');
+    console.log('👤 Usuário de teste:', testUserId);
     
   } catch (error) {
     console.error('❌ Erro durante o seed:', error);

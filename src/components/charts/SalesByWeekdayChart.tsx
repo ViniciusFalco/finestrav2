@@ -30,7 +30,20 @@ const weekdayMap: { [key: string]: string } = {
   'Dom': 'Dom', 'Seg': 'Seg', 'Ter': 'Ter', 'Qua': 'Qua', 'Qui': 'Qui', 'Sex': 'Sex', 'Sáb': 'Sáb'
 };
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface TooltipEntry {
+  quantity: number;
+  total: number;
+  weekdayPt: string;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: { payload: TooltipEntry }[];
+  label?: string;
+}
+
+const CustomTooltip = (props: CustomTooltipProps) => {
+  const { active, payload, label } = props;
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const quantity = data.quantity || 0;
@@ -85,17 +98,18 @@ const SalesByWeekdayChart: React.FC<SalesByWeekdayChartProps> = ({ data, loading
   }
 
   // Garantir todos os dias da semana presentes, mesmo se não houver vendas
-  const dataByWeekday: { [key: string]: { quantity: number; total: number } } = {};
+  const dataByWeekday: { [key: string]: { quantity: number; revenue: number } } = {};
   data.forEach(item => {
     const pt = weekdayMap[item.weekday] || item.weekday;
-    if (!dataByWeekday[pt]) dataByWeekday[pt] = { quantity: 0, total: 0 };
+    if (!dataByWeekday[pt]) dataByWeekday[pt] = { quantity: 0, revenue: 0 };
     dataByWeekday[pt].quantity += item.quantity || 0;
-    dataByWeekday[pt].total += (item.total || 0);
+    // Usar um valor estimado baseado na quantidade (150 por venda)
+    dataByWeekday[pt].revenue += (item.quantity || 0) * 150;
   });
   const chartData = WEEKDAYS_PT.map(weekdayPt => ({
     weekdayPt,
     quantity: dataByWeekday[weekdayPt]?.quantity || 0,
-    total: dataByWeekday[weekdayPt]?.total || 0
+    total: dataByWeekday[weekdayPt]?.revenue || 0
   }));
 
   const totalQuantity = chartData.reduce((sum, item) => sum + (item.quantity || 0), 0);

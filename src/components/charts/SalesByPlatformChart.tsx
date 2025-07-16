@@ -20,7 +20,20 @@ interface SalesByPlatformChartProps {
 
 const COLORS = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface TooltipEntry {
+  revenue: number;
+  quantity: number;
+  refunds: number;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: { payload: TooltipEntry }[];
+  label?: string;
+}
+
+const CustomTooltip = (props: CustomTooltipProps) => {
+  const { active, payload, label } = props;
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (

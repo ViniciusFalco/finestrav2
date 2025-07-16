@@ -15,10 +15,22 @@ interface TopProductsChartProps {
   loading?: boolean;
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+interface TooltipEntry {
+  product: string;
+  revenue: number;
+  totalRevenue: number;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: { payload: TooltipEntry }[];
+}
+
+const CustomTooltip = (props: CustomTooltipProps) => {
+  const { active, payload } = props;
   if (active && payload && payload.length) {
     const data = payload[0].payload;
-    const totalRevenue = payload[0].payload.totalRevenue || 0;
+    const totalRevenue = data.totalRevenue || 0;
     const percentage = totalRevenue > 0 ? (data.revenue / totalRevenue) * 100 : 0;
     
     return (

@@ -18,12 +18,25 @@ interface AccumulatedChartProps {
   loading?: boolean;
 }
 
-const CustomTooltip = ({ active, payload, label }: any) => {
+interface TooltipEntry {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipEntry[];
+  label?: string;
+}
+
+const CustomTooltip = (props: CustomTooltipProps) => {
+  const { active, payload, label } = props;
   if (active && payload && payload.length) {
     return (
       <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
         <p className="font-medium text-gray-900 mb-2">{`Data: ${label}`}</p>
-        {payload.map((entry: any, index: number) => (
+        {payload.map((entry: TooltipEntry, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
             {`${entry.name}: R$ ${entry.value?.toLocaleString()}`}
           </p>

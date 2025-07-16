@@ -17,6 +17,7 @@ create table if not exists products (
   id uuid default gen_random_uuid() primary key,
   user_id uuid not null references auth.users(id) on delete cascade,
   name text not null,
+  price numeric(12,2) not null default 0,
   created_at timestamp with time zone default now()
 );
 

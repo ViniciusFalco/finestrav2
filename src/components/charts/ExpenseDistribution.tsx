@@ -15,7 +15,19 @@ interface ExpenseDistributionChartProps {
   loading?: boolean;
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+interface TooltipEntry {
+  name: string;
+  value: number;
+  total: number;
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: { payload: TooltipEntry }[];
+}
+
+const CustomTooltip = (props: CustomTooltipProps) => {
+  const { active, payload } = props;
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     return (

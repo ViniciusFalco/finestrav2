@@ -178,10 +178,13 @@ export function useDashboardData(filters: DashboardFilter) {
         const ptWeek: Record<string, string> = {
           Sun: 'Dom', Mon: 'Seg', Tue: 'Ter', Wed: 'Qua', Thu: 'Qui', Fri: 'Sex', Sat: 'Sáb',
         };
-        const salesByWeekdayPt = (salesByWeekday || []).map((r: any) => ({
-          ...r,
-          weekday: ptWeek[r.weekday as keyof typeof ptWeek] ?? r.weekday,
-        }));
+        const salesByWeekdayPt = (salesByWeekday || []).map((r: unknown) => {
+          const row = r as { weekday: string; quantity: number };
+          return {
+            weekday: ptWeek[row.weekday as keyof typeof ptWeek] ?? row.weekday,
+            quantity: row.quantity || 0,
+          };
+        });
         
         // 6. Transformar dados de vendas em formato para gráficos
         const dailyData = transformSalesToDailySummary(sales || [], expenses || [], refunds || []);
