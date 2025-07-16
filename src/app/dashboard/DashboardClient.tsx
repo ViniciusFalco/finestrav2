@@ -16,7 +16,7 @@ import { FilterDrawer } from '@/components/FilterDrawer';
 import { DateRangePicker } from '@/components/filters/DateRangePicker';
 import { ProductMultiSelect } from '@/components/filters/ProductMultiSelect';
 import { subDays } from 'date-fns';
-import { ArrowDown, ArrowUp, PiggyBank, Receipt } from 'lucide-react';
+import Header from '@/components/Header';
 
 export default function DashboardClient() {
   // Estado para filtros
@@ -42,70 +42,23 @@ export default function DashboardClient() {
     );
   }
 
+  // Calcular dados para o Header
+  const mesAtual = dateRange.start.toLocaleDateString('pt-BR', { month: 'long' });
+  const produtosSelecionados = productIds.length === 0 ? 'Todos os produtos' : `${productIds.length} produto(s)`;
+  const resumo = {
+    faturamento: data.periodTotals?.totalRevenue?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00',
+    lucro: data.periodTotals?.totalProfit?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00',
+    despesas: data.periodTotals?.totalExpenses?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00',
+    reembolsos: (data.sales?.reduce((acc, item) => acc + (item.refunds || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'),
+  };
+
   return (
     <DashboardLayout>
+      <Header mesAtual={mesAtual} produtosSelecionados={produtosSelecionados} resumo={resumo} />
       <div className="space-y-6">
-        {/* Título de filtros ativos */}
-        <div className="mb-2">
-          <span className="text-sm text-neutral-700 font-medium">
-            {dateRange.start.toLocaleDateString('pt-BR', { month: 'long' })}
-            {dateRange.end.getFullYear() !== dateRange.start.getFullYear() ?
-              `/${dateRange.end.getFullYear()}` : ''}
-            {' – '}
-            {productIds.length === 0 ? 'Todos os produtos' : `${productIds.length} produto(s)`}
-          </span>
-        </div>
-        {/* Cards de resumo coloridos */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          <Card className="bg-green-50 border-green-200 text-green-800">
-            <CardContent className="p-3 flex flex-col gap-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">Faturamento</span>
-                <Receipt className="h-5 w-5" />
-              </div>
-              <span className="text-lg font-bold">
-                R$ {data.periodTotals?.totalRevenue?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
-              </span>
-            </CardContent>
-          </Card>
-          <Card className="bg-emerald-50 border-emerald-200 text-emerald-800">
-            <CardContent className="p-3 flex flex-col gap-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">Lucro Líquido</span>
-                <PiggyBank className="h-5 w-5" />
-              </div>
-              <span className="text-lg font-bold">
-                R$ {data.periodTotals?.totalProfit?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
-              </span>
-            </CardContent>
-          </Card>
-          <Card className="bg-red-50 border-red-200 text-red-800">
-            <CardContent className="p-3 flex flex-col gap-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">Despesas</span>
-                <ArrowUp className="h-5 w-5" />
-              </div>
-              <span className="text-lg font-bold">
-                R$ {data.periodTotals?.totalExpenses?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
-              </span>
-            </CardContent>
-          </Card>
-          <Card className="bg-purple-50 border-purple-200 text-purple-800">
-            <CardContent className="p-3 flex flex-col gap-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-medium">Reembolsos</span>
-                <ArrowDown className="h-5 w-5" />
-              </div>
-              <span className="text-lg font-bold">
-                R$ {data.sales?.reduce((acc, item) => acc + (item.refunds || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'}
-              </span>
-            </CardContent>
-          </Card>
-        </div>
         {/* Header com título e filtros */}
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Dashboard</h1>
-
           <FilterDrawer>
             <div className="space-y-4">
               <DateRangePicker value={dateRange} onChange={setDateRange} />
@@ -123,7 +76,6 @@ export default function DashboardClient() {
             </div>
           </FilterDrawer>
         </div>
-
         {/* Gráficos em coluna única */}
         <div className="space-y-6">
           <Card className="shadow-soft">
