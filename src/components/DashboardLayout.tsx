@@ -12,7 +12,6 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Header from './Header';
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -97,9 +96,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <Header />
-
+        {/* Header REMOVIDO - agora só no DashboardClient com props */}
         {/* Main Content Area */}
         <main className="flex-1 overflow-auto bg-neutral-50 p-4 lg:p-6">
           <div className="max-w-7xl mx-auto">
