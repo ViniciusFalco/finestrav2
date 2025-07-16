@@ -16,7 +16,7 @@ import { FilterDrawer } from '@/components/FilterDrawer';
 import { DateRangePicker } from '@/components/filters/DateRangePicker';
 import { ProductMultiSelect } from '@/components/filters/ProductMultiSelect';
 import { subDays } from 'date-fns';
-import Header from '@/components/Header';
+import { Header } from '@/components/Header';
 
 export default function DashboardClient() {
   // Estado para filtros
@@ -43,18 +43,17 @@ export default function DashboardClient() {
   }
 
   // Calcular dados para o Header
-  const mesAtual = dateRange.start.toLocaleDateString('pt-BR', { month: 'long' });
-  const produtosSelecionados = productIds.length === 0 ? 'Todos os produtos' : `${productIds.length} produto(s)`;
-  const resumo = {
-    faturamento: data.periodTotals?.totalRevenue?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00',
-    lucro: data.periodTotals?.totalProfit?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00',
-    despesas: data.periodTotals?.totalExpenses?.toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00',
-    reembolsos: (data.sales?.reduce((acc, item) => acc + (item.refunds || 0), 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 }) || '0,00'),
+  const subtitle = `${dateRange.start.toLocaleDateString('pt-BR', { month: 'long' })} — ${productIds.length === 0 ? 'Todos os produtos' : `${productIds.length} produto(s)`}`;
+  const totals = {
+    revenue: data.periodTotals?.totalRevenue || 0,
+    profit: data.periodTotals?.totalProfit || 0,
+    expenses: data.periodTotals?.totalExpenses || 0,
+    refunds: data.sales?.reduce((acc, item) => acc + (item.refunds || 0), 0) || 0,
   };
 
   return (
     <DashboardLayout>
-      <Header mesAtual={mesAtual} produtosSelecionados={produtosSelecionados} resumo={resumo} />
+      <Header subtitle={subtitle} totals={totals} />
       <div className="space-y-6">
         {/* Header com título e filtros */}
         <div className="flex justify-between items-center mb-6">
