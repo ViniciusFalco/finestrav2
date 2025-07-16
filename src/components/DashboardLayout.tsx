@@ -1,16 +1,13 @@
 'use client';
 import { ReactNode, useState } from 'react';
 import Link from 'next/link';
-import { supabaseBrowser } from '@/lib/supabaseClient.browser';
-import { useRouter } from 'next/navigation';
 import { 
   BarChart3, 
-  TrendingUp, 
-  Target, 
+  BarChart2,
+  Crosshair, // Usar Crosshair para Metas
   FolderCog, 
   ReceiptText, 
   Megaphone, 
-  LogOut, 
   ChevronLeft, 
   ChevronRight
 } from 'lucide-react';
@@ -23,13 +20,6 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [open, setOpen] = useState(true);
-  const router = useRouter();
-  const supabase = supabaseBrowser();
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut({ scope: 'global' });
-    router.push('/login');
-  };
 
   return (
     <div className="flex h-screen bg-neutral-50">
@@ -53,6 +43,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <Link 
             href="/dashboard" 
             className="flex items-center p-4 hover:bg-neutral-700 transition-colors group"
+            title="Dashboard"
           >
             <BarChart3 className="h-5 w-5 text-neutral-400 group-hover:text-white" />
             <span className={`ml-3 ${open ? '' : 'hidden'}`}>Dashboard</span>
@@ -60,20 +51,23 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <Link 
             href="/goals" 
             className="flex items-center p-4 hover:bg-neutral-700 transition-colors group"
+            title="Metas"
           >
-            <Target className="h-5 w-5 text-neutral-400 group-hover:text-white" />
+            <Crosshair className="h-5 w-5 text-neutral-400 group-hover:text-white" />
             <span className={`ml-3 ${open ? '' : 'hidden'}`}>Metas</span>
           </Link>
           <Link 
             href="/sales" 
             className="flex items-center p-4 hover:bg-neutral-700 transition-colors group"
+            title="Vendas"
           >
-            <TrendingUp className="h-5 w-5 text-neutral-400 group-hover:text-white" />
+            <BarChart2 className="h-5 w-5 text-neutral-400 group-hover:text-white" />
             <span className={`ml-3 ${open ? '' : 'hidden'}`}>Vendas</span>
           </Link>
           <Link 
             href="/accounts" 
             className="flex items-center p-4 hover:bg-neutral-700 transition-colors group"
+            title="Registro de Contas"
           >
             <FolderCog className="h-5 w-5 text-neutral-400 group-hover:text-white" />
             <span className={`ml-3 ${open ? '' : 'hidden'}`}>Registro de Contas</span>
@@ -81,6 +75,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <Link 
             href="/expenses" 
             className="flex items-center p-4 hover:bg-neutral-700 transition-colors group"
+            title="Registro de Despesas"
           >
             <ReceiptText className="h-5 w-5 text-neutral-400 group-hover:text-white" />
             <span className={`ml-3 ${open ? '' : 'hidden'}`}>Registro de Despesas</span>
@@ -88,6 +83,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           <Link 
             href="/ads" 
             className="flex items-center p-4 hover:bg-neutral-700 transition-colors group"
+            title="Ads"
           >
             <Megaphone className="h-5 w-5 text-neutral-400 group-hover:text-white" />
             <span className={`ml-3 ${open ? '' : 'hidden'}`}>Ads</span>
@@ -95,16 +91,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         </nav>
         
         <div className="absolute bottom-4 left-4 right-4">
-          {open && (
-            <Button
-              onClick={handleSignOut}
-              variant="destructive"
-              className="w-full"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Sair
-            </Button>
-          )}
+          {/* Nenhum botão de logout aqui */}
         </div>
       </aside>
 

@@ -13,15 +13,31 @@ export function useUser(): UserInfo {
     const fetchUser = async () => {
       const supabase = supabaseBrowser();
       const { data } = await supabase.auth.getUser();
-      if (data?.user?.user_metadata) {
-        setUser({
-          name: data.user.user_metadata.name || 'Usuário',
-          avatarUrl: data.user.user_metadata.avatar_url || undefined,
-        });
+      let name = 'Usuário';
+      let avatarUrl = undefined;
+      if (data?.user) {
+        const meta = data.user.user_metadata || {};
+        avatarUrl = meta.avatar_url || undefined;
+        if (meta.name && meta.name.trim()) {
+          name = meta.name;
+        } else if (data.user.email) {
+          name = data.user.email.split('@')[0];
+        }
       }
+      setUser({ name, avatarUrl });
     };
     fetchUser();
   }, []);
 
   return user;
+}
+
+// Função SSR para obter dados do usuário
+import { createClient } from '@/lib/supabaseServer';
+
+export async function getUserMeta() {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getUser();
+  const { full_name, avatar_url } = data.user?.user_metadata ?? {};
+  return { name: full_name ?? 'Usuário', avatarUrl: avatar_url };
 } 
