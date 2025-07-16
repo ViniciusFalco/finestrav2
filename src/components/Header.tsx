@@ -26,9 +26,9 @@ export default function Header({ mesAtual, produtosSelecionados, resumo }: Heade
         </div>
         <UserMenu />
       </div>
-      {/* Cards coloridos de resumo ultra-compactos */}
+      {/* Cards coloridos de resumo ultra-compactos, flat, sem borda */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-0">
-        <Card className="bg-green-50 border-green-200 text-green-800 shadow-none h-10 flex items-center rounded-none">
+        <Card className="bg-green-50 text-green-800 h-10 flex items-center">
           <CardContent className="p-1 flex flex-col justify-center h-full">
             <div className="flex items-center justify-between gap-1">
               <span className="text-[10px] font-medium">Faturamento</span>
@@ -37,7 +37,7 @@ export default function Header({ mesAtual, produtosSelecionados, resumo }: Heade
             <span className="text-xs font-bold leading-tight">R$ {resumo.faturamento}</span>
           </CardContent>
         </Card>
-        <Card className="bg-emerald-50 border-emerald-200 text-emerald-800 shadow-none h-10 flex items-center rounded-none">
+        <Card className="bg-emerald-50 text-emerald-800 h-10 flex items-center">
           <CardContent className="p-1 flex flex-col justify-center h-full">
             <div className="flex items-center justify-between gap-1">
               <span className="text-[10px] font-medium">Lucro Líquido</span>
@@ -46,7 +46,7 @@ export default function Header({ mesAtual, produtosSelecionados, resumo }: Heade
             <span className="text-xs font-bold leading-tight">R$ {resumo.lucro}</span>
           </CardContent>
         </Card>
-        <Card className="bg-red-50 border-red-200 text-red-800 shadow-none h-10 flex items-center rounded-none">
+        <Card className="bg-red-50 text-red-800 h-10 flex items-center">
           <CardContent className="p-1 flex flex-col justify-center h-full">
             <div className="flex items-center justify-between gap-1">
               <span className="text-[10px] font-medium">Despesas</span>
@@ -55,7 +55,7 @@ export default function Header({ mesAtual, produtosSelecionados, resumo }: Heade
             <span className="text-xs font-bold leading-tight">R$ {resumo.despesas}</span>
           </CardContent>
         </Card>
-        <Card className="bg-purple-50 border-purple-200 text-purple-800 shadow-none h-10 flex items-center rounded-none">
+        <Card className="bg-purple-50 text-purple-800 h-10 flex items-center">
           <CardContent className="p-1 flex flex-col justify-center h-full">
             <div className="flex items-center justify-between gap-1">
               <span className="text-[10px] font-medium">Reembolsos</span>
