@@ -1,15 +1,12 @@
 'use client'
-import { useUser } from '@/hooks/useUser'
-import { ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import UserMenu from './UserMenu'
 
 export function Header({ subtitle, totals }: { subtitle: string, totals: { revenue: number, profit: number, expenses: number, refunds: number } }) {
-  const { name, avatarUrl } = useUser()
-
   return (
     <header
       className={cn(
-        'w-full px-4 py-2',
+        'w-full',
         'bg-gradient-to-r from-green-500 via-green-600 to-green-700',
         'text-white flex flex-wrap items-center gap-4'
       )}
@@ -28,22 +25,9 @@ export function Header({ subtitle, totals }: { subtitle: string, totals: { reven
         <Card metric="Reembolsos" value={totals.refunds} color="purple" />
       </div>
 
-      {/* Menu do usuário */}
+      {/* Menu do usuário funcional */}
       <div className="relative">
-        <button
-          className="flex items-center gap-2 focus:outline-none"
-          aria-label="Abrir menu do usuário"
-        >
-          <img
-            src={avatarUrl ?? '/avatar.svg'}
-            alt=""
-            className="w-8 h-8 rounded-full object-cover"
-          />
-          <span className="hidden sm:inline text-sm font-medium">{name}</span>
-          <ChevronDown size={16} />
-        </button>
-        {/* dropdown absoluto (simplificado) */}
-        {/* …Configurações / Sair… */}
+        <UserMenu />
       </div>
     </header>
   )
