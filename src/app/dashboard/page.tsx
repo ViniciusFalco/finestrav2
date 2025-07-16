@@ -7,6 +7,8 @@ export default async function DashboardPage() {
   const { supabase } = getServerSupabase()
   const { data: { session } } = await supabase.auth.getSession()
 
+  console.log('Sessão SSR:', session);
+
   if (!session) redirect('/login')   // 🔒 redireciona se não logado
 
   return <DashboardClient />
