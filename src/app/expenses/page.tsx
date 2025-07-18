@@ -73,7 +73,7 @@ export default function ExpensesPage() {
       )}
       {modalOpen && (
         <ExpenseForm
-          initialData={editing}
+          initialData={editing ?? undefined}
           onSubmit={handleSave}
           onClose={() => { setModalOpen(false); setEditing(null); }}
         />
