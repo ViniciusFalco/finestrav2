@@ -99,35 +99,23 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
           ))}
         </TextField>
         <TextField
-          select
           label="Grupo"
           name="group"
-          value={form.group}
-          onChange={handleChange}
+          value={accounts.find((a: any) => a.id === form.account_id)?.group || ''}
           fullWidth
           margin="normal"
           required
-          disabled={!form.account_id}
-        >
-          {groups.map((g: any) => (
-            <MenuItem key={g} value={g}>{g}</MenuItem>
-          ))}
-        </TextField>
+          disabled
+        />
         <TextField
-          select
           label="Subgrupo"
-          name="category_id"
-          value={form.category_id}
-          onChange={handleChange}
+          name="subgroup"
+          value={accounts.find((a: any) => a.id === form.account_id)?.subgroup || ''}
           fullWidth
           margin="normal"
           required
-          disabled={!form.group}
-        >
-          {subgroups.map((sg: any) => (
-            <MenuItem key={sg.id} value={sg.id}>{sg.name}</MenuItem>
-          ))}
-        </TextField>
+          disabled
+        />
         <TextField
           label="Valor"
           name="value"
