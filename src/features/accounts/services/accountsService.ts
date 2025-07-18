@@ -11,6 +11,7 @@ export type AccountDTO = {
 export async function listAccounts() {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
+  if (!userId) throw new Error('Usuário não autenticado');
   const { data, error } = await supabase
     .from('accounts')
     .select('*')
@@ -22,6 +23,7 @@ export async function listAccounts() {
 export async function createAccount(dto: AccountDTO) {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
+  if (!userId) throw new Error('Usuário não autenticado');
   const { data, error } = await supabase
     .from('accounts')
     .insert([{ ...dto, user_id: userId }]);
@@ -32,6 +34,7 @@ export async function createAccount(dto: AccountDTO) {
 export async function updateAccount(id: string, dto: AccountDTO) {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
+  if (!userId) throw new Error('Usuário não autenticado');
   const { data, error } = await supabase
     .from('accounts')
     .update({ ...dto, user_id: userId })
@@ -44,6 +47,7 @@ export async function updateAccount(id: string, dto: AccountDTO) {
 export async function deleteAccount(id: string) {
   const { data: userData } = await supabase.auth.getUser();
   const userId = userData.user?.id;
+  if (!userId) throw new Error('Usuário não autenticado');
   const { data, error } = await supabase
     .from('accounts')
     .delete()

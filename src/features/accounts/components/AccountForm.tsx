@@ -14,6 +14,24 @@ const GROUPS = [
   { value: 'Despesas Variáveis', label: 'Despesas Variáveis' },
 ];
 
+const SUBGROUPS = [
+  'Consumo elétrico',
+  'Água',
+  'Internet',
+  'Telefonia',
+  'Aluguel',
+  'Transporte',
+  'Alimentação',
+  'Saúde',
+  'Educação',
+  'Marketing',
+  'Honorários profissionais',
+  'Equipamentos',
+  'Licenças e taxas',
+  'Lazer e entretenimento',
+  'Seguros',
+];
+
 export default function AccountForm({ open, onClose, onSuccess, initialData }: AccountFormProps) {
   const [form, setForm] = useState<AccountDTO>({
     name: initialData?.name || '',
@@ -73,6 +91,7 @@ export default function AccountForm({ open, onClose, onSuccess, initialData }: A
           ))}
         </TextField>
         <TextField
+          select
           label="Subgrupo"
           name="subgroup"
           value={form.subgroup}
@@ -80,7 +99,11 @@ export default function AccountForm({ open, onClose, onSuccess, initialData }: A
           fullWidth
           margin="normal"
           required
-        />
+        >
+          {SUBGROUPS.map((sg) => (
+            <MenuItem key={sg} value={sg}>{sg}</MenuItem>
+          ))}
+        </TextField>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>Cancelar</Button>
