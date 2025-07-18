@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from 'react';
 import { ExpenseTable } from '@/features/expenses/components/ExpenseTable';
 import { ExpenseForm } from '@/features/expenses/components/ExpenseForm';
