@@ -2,8 +2,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 
 interface ExpenseTableProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any[];
+  data: unknown[];
 }
 
 export default function ExpenseTable({ data }: ExpenseTableProps) {

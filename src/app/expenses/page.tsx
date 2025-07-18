@@ -11,7 +11,7 @@ export default function ExpensesPage() {
   const { accounts } = useAccounts();
   const [modalOpen, setModalOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [editing, setEditing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<unknown | null>(null);
   const [search, setSearch] = useState('');
   const [toast, setToast] = useState<string | null>(null);
 

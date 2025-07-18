@@ -9,21 +9,20 @@ interface ExpenseFormProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  initialData?: any;
+  initialData?: unknown;
 }
 
 export default function ExpenseForm({ open, onClose, onSuccess, initialData }: ExpenseFormProps) {
   const { accounts } = useAccounts();
   const { categories } = useCategories();
   const [form, setForm] = useState({
-    account_id: initialData?.account_id || '',
-    group: initialData?.group || '',
-    category_id: initialData?.category_id || '',
-    value: initialData?.value || '',
-    interest: initialData?.interest || '',
-    dueDate: initialData?.due_date || '',
-    paymentDate: initialData?.payment_date || '',
+    account_id: (initialData as any)?.account_id || '',
+    group: (initialData as any)?.group || '',
+    category_id: (initialData as any)?.category_id || '',
+    value: (initialData as any)?.value || '',
+    interest: (initialData as any)?.interest || '',
+    dueDate: (initialData as any)?.due_date || '',
+    paymentDate: (initialData as any)?.payment_date || '',
   });
   const [loading, setLoading] = useState(false);
 
@@ -52,8 +51,8 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
         dueDate: form.dueDate,
         paymentDate: form.paymentDate || null,
       };
-      if (initialData?.id) {
-        await updateExpense(initialData.id, dto);
+      if ((initialData as any)?.id) {
+        await updateExpense((initialData as any).id, dto);
       } else {
         await createExpense(dto);
       }
@@ -90,7 +89,7 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
           margin="normal"
           required
         >
-          {accounts.map((acc: any) => (
+          {accounts.map((acc: unknown) => (
             <MenuItem key={acc.id} value={acc.id}>{acc.name}</MenuItem>
           ))}
         </TextField>
@@ -105,7 +104,7 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
           required
           disabled={!form.account_id}
         >
-          {groups.map((g: any) => (
+          {groups.map((g: unknown) => (
             <MenuItem key={g} value={g}>{g}</MenuItem>
           ))}
         </TextField>
@@ -120,7 +119,7 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
           required
           disabled={!form.group}
         >
-          {subgroups.map((sg: any) => (
+          {subgroups.map((sg: unknown) => (
             <MenuItem key={sg.id} value={sg.id}>{sg.name}</MenuItem>
           ))}
         </TextField>
