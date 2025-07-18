@@ -56,9 +56,9 @@ export default function ExpensesPage() {
   const formInitialData = editing
     ? {
         ...editing,
-        account: (editing.account as any)?.id || '',
-        group: (editing.category as any)?.parent_id || '',
-        subgroup: (editing.category as any)?.id || '',
+        account: editing.account?.id || '',
+        group: editing.category?.parent_id || '',
+        subgroup: editing.category?.id || '',
       }
     : undefined;
 

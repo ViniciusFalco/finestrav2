@@ -4,7 +4,7 @@ import { ExpenseFormData } from '../schemas';
 export async function listExpenses(userId: string) {
   const { data, error } = await supabaseBrowser()
     .from('expenses')
-    .select('*')
+    .select('*, account:accounts(id, name), category:categories(id, name, parent_id)')
     .eq('user_id', userId)
     .order('dueDate', { ascending: false });
   if (error) throw error;
@@ -14,7 +14,15 @@ export async function listExpenses(userId: string) {
 export async function createExpense(userId: string, dto: ExpenseFormData) {
   const { data, error } = await supabaseBrowser()
     .from('expenses')
-    .insert([{ ...dto, user_id: userId }])
+    .insert([{ 
+      user_id: userId,
+      account_id: dto.account,
+      category_id: dto.subgroup, // FK para categories
+      value: dto.value,
+      interest: dto.interest ?? 0,
+      due_date: dto.dueDate,
+      payment_date: dto.paymentDate ?? null
+    }])
     .select()
     .single();
   if (error) throw error;

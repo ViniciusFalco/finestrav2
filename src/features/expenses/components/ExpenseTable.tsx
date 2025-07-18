@@ -2,9 +2,10 @@ import React from 'react';
 
 export interface Expense {
   id: string;
-  account: string;
-  group: string;
-  subgroup: string;
+  account: { id: string; name: string } | null;
+  category: { id: string; name: string; parent_id: string | null } | null;
+  group?: string; // pode ser populado conforme lógica de categoria
+  subgroup?: string; // pode ser populado conforme lógica de categoria
   value: number;
   interest?: number;
   dueDate: string;
@@ -41,9 +42,9 @@ export function ExpenseTable({ expenses, onEdit, onDelete }: ExpenseTableProps) 
           )}
           {expenses.map((exp) => (
             <tr key={exp.id} className="border-t hover:bg-gray-50">
-              <td className="px-2 py-1">{exp.account}</td>
-              <td className="px-2 py-1">{exp.group}</td>
-              <td className="px-2 py-1">{exp.subgroup}</td>
+              <td className="px-2 py-1">{exp.account?.name || '-'}</td>
+              <td className="px-2 py-1">{exp.category?.parent_id || '-'}</td>
+              <td className="px-2 py-1">{exp.category?.name || '-'}</td>
               <td className="px-2 py-1 text-right">{exp.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</td>
               <td className="px-2 py-1 text-right">{exp.interest ? exp.interest.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : '-'}</td>
               <td className="px-2 py-1 text-center">{exp.dueDate}</td>
