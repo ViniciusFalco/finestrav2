@@ -12,7 +12,7 @@ export async function listExpenses() {
     .from('expenses')
     .select('*, account:accounts(id, name), category:categories(id, name, parent_id)')
     .eq('user_id', userId)
-    .order('due_date', { ascending: false });
+    .order('date', { ascending: false });
   if (error) throw error;
   return data;
 }
