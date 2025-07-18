@@ -34,12 +34,10 @@ export function ExpenseForm({ userId, initialData, onSubmit, onClose }: ExpenseF
   const today = new Date().toISOString().split('T')[0];
 
   const groups: Group[] = useMemo(() => {
-    const acc = accounts.find((a: Account) => a.id === selectedAccount);
-    return acc?.groups || [];
+    return accounts.find((a: Account) => a.id === selectedAccount)?.groups || [];
   }, [selectedAccount, accounts]);
 
   const subgroups: Subgroup[] = useMemo(() => {
-    const acc = accounts.find((a: Account) => a.id === selectedAccount);
     const group = groups.find((g: Group) => g.id === watch('group'));
     return group?.subgroups || [];
   }, [selectedAccount, groups, accounts, watch]);
