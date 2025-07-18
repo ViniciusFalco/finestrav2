@@ -6,12 +6,18 @@ import { useExpenses } from '@/features/expenses/hooks/useExpenses';
 import { useAccounts } from '@/features/accounts/hooks/useAccounts';
 import { DashboardLayout } from '@/components/DashboardLayout';
 
+interface ExpenseEditing {
+  account?: { id?: string };
+  category?: { id?: string; parent_id?: string };
+  [key: string]: any;
+}
+
 export default function ExpensesPage() {
   const { expenses, isLoading, error, refresh } = useExpenses();
   const { accounts } = useAccounts();
   const [modalOpen, setModalOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [editing, setEditing] = useState<unknown | null>(null);
+  const [editing, setEditing] = useState<ExpenseEditing | null>(null);
   const [search, setSearch] = useState('');
   const [toast, setToast] = useState<string | null>(null);
 
