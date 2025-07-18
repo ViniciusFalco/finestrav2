@@ -43,7 +43,10 @@ export default function DashboardClient() {
   }
 
   // Calcular dados para o Header
-  const subtitle = `${dateRange.start.toLocaleDateString('pt-BR', { month: 'long' })} — ${productIds.length === 0 ? 'Todos os produtos' : `${productIds.length} produto(s)`}`;
+  const periodInfo = {
+    periodLabel: dateRange.start.toLocaleDateString('pt-BR', { month: 'long' }),
+    productLabel: productIds.length === 0 ? 'Todos os produtos' : `${productIds.length} produto(s)`
+  };
   const totals = {
     revenue: data.periodTotals?.totalRevenue || 0,
     profit: data.periodTotals?.totalProfit || 0,
@@ -53,7 +56,7 @@ export default function DashboardClient() {
 
   return (
     <DashboardLayout>
-      <Header subtitle={subtitle} totals={totals} />
+      <Header periodInfo={periodInfo} totals={totals} />
       <div className="space-y-6">
         {/* Header com título e filtros */}
         <div className="flex justify-between items-center mb-6">
