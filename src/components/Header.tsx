@@ -3,6 +3,7 @@ import { useUser } from '@/hooks/useUser';
 import { cn } from '@/lib/utils';
 import { ChevronDown, Settings, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { useState, useRef, useEffect } from 'react';
 
 interface PeriodInfoProps { periodLabel: string; productLabel: string }
 interface Totals { revenue: number; profit: number; expenses: number; refunds: number }
@@ -17,6 +18,23 @@ export function Header({
   onToggleFilters?: () => void;
 }) {
   const { name, avatarUrl, signOut } = useUser();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Fecha o menu ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    if (menuOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [menuOpen]);
 
   const MetricCard = ({
     label,
@@ -41,8 +59,8 @@ export function Header({
   );
 
   return (
-    <header className="w-full rounded-b-lg bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-white shadow-sm">
-      <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-2">
+    <header className="w-full bg-gradient-to-r from-green-500 via-green-600 to-green-700 text-white shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-4 px-4 py-2 m-0">
         {/* LOGO + subtítulo */}
         <div className="flex flex-col">
           <h1 className="text-lg font-bold leading-none">Finestra V2</h1>
@@ -98,10 +116,13 @@ export function Header({
         </button>
 
         {/* MENU USUÁRIO */}
-        <div className="relative">
+        <div className="relative" ref={menuRef}>
           <button
             className="flex items-center gap-2 rounded-md bg-white/10 px-2 py-1 hover:bg-white/20"
             aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            onClick={() => setMenuOpen((v) => !v)}
+            type="button"
           >
             {avatarUrl ? (
               /* eslint-disable-next-line @next/next/no-img-element */
@@ -120,24 +141,26 @@ export function Header({
           </button>
 
           {/* Dropdown – simples, sem libs */}
-          <ul className="invisible absolute right-0 mt-1 w-44 rounded-md bg-white py-1 text-sm text-gray-800 shadow-lg group-aria-expanded:visible">
-            <li>
-              <Link
-                href="#"
-                className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100"
-              >
-                <Settings size={14} /> Configurações
-              </Link>
-            </li>
-            <li>
-              <button
-                onClick={signOut}
-                className="flex w-full items-center gap-2 px-3 py-2 hover:bg-gray-100"
-              >
-                <LogOut size={14} /> Sair
-              </button>
-            </li>
-          </ul>
+          {menuOpen && (
+            <ul className="absolute right-0 mt-1 w-44 rounded-md bg-white py-1 text-sm text-gray-800 shadow-lg z-50">
+              <li>
+                <Link
+                  href="#"
+                  className="flex items-center gap-2 px-3 py-2 hover:bg-gray-100"
+                >
+                  <Settings size={14} /> Configurações
+                </Link>
+              </li>
+              <li>
+                <button
+                  onClick={signOut}
+                  className="flex w-full items-center gap-2 px-3 py-2 hover:bg-gray-100"
+                >
+                  <LogOut size={14} /> Sair
+                </button>
+              </li>
+            </ul>
+          )}
         </div>
       </div>
     </header>
