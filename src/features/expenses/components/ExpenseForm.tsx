@@ -1,147 +1,175 @@
-import React, { useMemo } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { expenseSchema, ExpenseFormData } from '../schemas';
+import React, { useState, useMemo } from 'react';
 import { useAccounts } from '@/features/accounts/hooks/useAccounts';
-import type { Account, Group, Subgroup } from '@/features/accounts/types';
+import { useCategories } from '@/features/ads/hooks/useCategories';
+import { createExpense, updateExpense } from '../services/expensesService';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField } from '@mui/material';
+import dayjs from 'dayjs';
 
 interface ExpenseFormProps {
-  userId: string;
-  initialData?: Partial<ExpenseFormData>;
-  onSubmit: (data: ExpenseFormData) => void;
+  open: boolean;
   onClose: () => void;
+  onSuccess: () => void;
+  initialData?: any;
 }
 
-export function ExpenseForm({ userId, initialData, onSubmit, onClose }: ExpenseFormProps) {
-  const { accounts, isLoading } = useAccounts(userId);
-  const {
-    register,
-    handleSubmit,
-    control,
-    watch,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm<ExpenseFormData>({
-    resolver: zodResolver(expenseSchema),
-    defaultValues: initialData || {},
+export default function ExpenseForm({ open, onClose, onSuccess, initialData }: ExpenseFormProps) {
+  const { accounts } = useAccounts();
+  const { categories } = useCategories();
+  const [form, setForm] = useState({
+    account_id: initialData?.account_id || '',
+    group: initialData?.group || '',
+    category_id: initialData?.category_id || '',
+    value: initialData?.value || '',
+    interest: initialData?.interest || '',
+    dueDate: initialData?.due_date || '',
+    paymentDate: initialData?.payment_date || '',
   });
+  const [loading, setLoading] = useState(false);
 
-  React.useEffect(() => {
-    reset(initialData || {});
-  }, [initialData, reset]);
+  // Grupos únicos da conta escolhida
+  const groups = useMemo(() => {
+    const acc = accounts.find(a => a.id === form.account_id);
+    return acc ? [acc.group] : [];
+  }, [accounts, form.account_id]);
 
-  const selectedAccount = watch('account');
-  const today = new Date().toISOString().split('T')[0];
+  // Subgrupos filtrados
+  const subgroups = useMemo(() => {
+    return categories.filter(c => c.group === form.group);
+  }, [categories, form.group]);
 
-  const groups: Group[] = useMemo(() => {
-    return accounts.find((a: Account) => a.id === selectedAccount)?.groups || [];
-  }, [selectedAccount, accounts]);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  const subgroups: Subgroup[] = useMemo(() => {
-    const group = groups.find((g: Group) => g.id === watch('group'));
-    return group?.subgroups || [];
-  }, [selectedAccount, groups, accounts, watch]);
+  const handleSubmit = async () => {
+    setLoading(true);
+    try {
+      const dto = {
+        ...form,
+        value: Number(form.value),
+        interest: Number(form.interest) || 0,
+        dueDate: form.dueDate,
+        paymentDate: form.paymentDate || null,
+      };
+      if (initialData?.id) {
+        await updateExpense(initialData.id, dto);
+      } else {
+        await createExpense(dto);
+      }
+      onSuccess();
+      onClose();
+    } catch (e) {
+      // TODO: tratar erro
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  if (!isLoading && accounts.length === 0) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md flex flex-col items-center">
-          <p className="text-red-600 font-semibold mb-4">Cadastre uma conta antes de lançar despesas.</p>
-          <button onClick={onClose} className="px-4 py-2 bg-gray-200 rounded">Fechar</button>
-        </div>
-      </div>
-    );
-  }
+  // Validações
+  const isValid =
+    form.account_id &&
+    form.group &&
+    form.category_id &&
+    Number(form.value) > 0 &&
+    form.dueDate &&
+    (!form.paymentDate || dayjs(form.paymentDate).isSameOrBefore(dayjs(), 'day')) &&
+    dayjs(form.dueDate).isSameOrAfter(dayjs(), 'day');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md flex flex-col gap-3"
-      >
-        <h2 className="text-lg font-bold mb-2">{initialData ? 'Editar Despesa' : 'Nova Despesa'}</h2>
-        {/* Conta */}
-        <div>
-          <label className="block text-xs font-medium after:content-['*'] after:text-red-500">Conta</label>
-          <Controller
-            name="account"
-            control={control}
-            render={({ field }) => (
-              <select {...field} className="input">
-                <option value="">Selecione</option>
-                {accounts.map((a: Account) => (
-                  <option key={a.id} value={a.id}>{a.name}</option>
-                ))}
-              </select>
-            )}
-          />
-          {errors.account && <span className="text-red-500 text-xs">{errors.account.message}</span>}
-        </div>
-        {/* Grupo */}
-        <div>
-          <label className="block text-xs font-medium after:content-['*'] after:text-red-500">Grupo</label>
-          <Controller
-            name="group"
-            control={control}
-            render={({ field }) => (
-              <select {...field} className="input" disabled={!selectedAccount}>
-                <option value="">Selecione</option>
-                {groups.map((g: Group) => (
-                  <option key={g.id} value={g.id}>{g.name}</option>
-                ))}
-              </select>
-            )}
-          />
-          {errors.group && <span className="text-red-500 text-xs">{errors.group.message}</span>}
-        </div>
-        {/* Subgrupo */}
-        <div>
-          <label className="block text-xs font-medium after:content-['*'] after:text-red-500">Subgrupo</label>
-          <Controller
-            name="subgroup"
-            control={control}
-            render={({ field }) => (
-              <select {...field} className="input" disabled={!watch('group')}>
-                <option value="">Selecione</option>
-                {subgroups.map((sg: Subgroup) => (
-                  <option key={sg.id} value={sg.id}>{sg.name}</option>
-                ))}
-              </select>
-            )}
-          />
-          {errors.subgroup && <span className="text-red-500 text-xs">{errors.subgroup.message}</span>}
-        </div>
-        {/* Valor */}
-        <div>
-          <label className="block text-xs font-medium after:content-['*'] after:text-red-500">Valor</label>
-          <input type="number" step="0.01" inputMode="decimal" {...register('value', { valueAsNumber: true })} className="input" />
-          {errors.value && <span className="text-red-500 text-xs">{errors.value.message}</span>}
-        </div>
-        {/* Juros */}
-        <div>
-          <label className="block text-xs font-medium">Juros</label>
-          <input type="number" step="0.01" inputMode="decimal" {...register('interest', { valueAsNumber: true })} className="input" />
-          {errors.interest && <span className="text-red-500 text-xs">{errors.interest.message}</span>}
-        </div>
-        {/* Data Vencimento */}
-        <div>
-          <label className="block text-xs font-medium after:content-['*'] after:text-red-500">Data Vencimento</label>
-          <input type="date" {...register('dueDate')} className="input" />
-          {errors.dueDate && <span className="text-red-500 text-xs">{errors.dueDate.message}</span>}
-        </div>
-        {/* Data Pagamento */}
-        <div>
-          <label className="block text-xs font-medium">Data Pagamento</label>
-          <input type="date" {...register('paymentDate')} className="input" max={today} />
-          {errors.paymentDate && <span className="text-red-500 text-xs">{errors.paymentDate.message}</span>}
-        </div>
-        <div className="flex gap-2 mt-4 justify-end">
-          <button type="button" onClick={onClose} className="px-3 py-1 rounded bg-gray-200">Cancelar</button>
-          <button type="submit" disabled={isSubmitting} className="px-3 py-1 rounded bg-green-600 text-white">
-            {isSubmitting ? 'Salvando...' : 'Salvar'}
-          </button>
-        </div>
-      </form>
-    </div>
+    <Dialog open={open} onClose={onClose}>
+      <DialogTitle>{initialData ? 'Editar Despesa' : 'Nova Despesa'}</DialogTitle>
+      <DialogContent>
+        <TextField
+          select
+          label="Conta"
+          name="account_id"
+          value={form.account_id}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        >
+          {accounts.map((acc: any) => (
+            <MenuItem key={acc.id} value={acc.id}>{acc.name}</MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          select
+          label="Grupo"
+          name="group"
+          value={form.group}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+          disabled={!form.account_id}
+        >
+          {groups.map((g: string) => (
+            <MenuItem key={g} value={g}>{g}</MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          select
+          label="Subgrupo"
+          name="category_id"
+          value={form.category_id}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+          disabled={!form.group}
+        >
+          {subgroups.map((sg: any) => (
+            <MenuItem key={sg.id} value={sg.id}>{sg.name}</MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          label="Valor"
+          name="value"
+          type="number"
+          value={form.value}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Juros"
+          name="interest"
+          type="number"
+          value={form.interest}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+        />
+        <TextField
+          label="Data de Vencimento"
+          name="dueDate"
+          type="date"
+          value={form.dueDate}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+          InputLabelProps={{ shrink: true }}
+        />
+        <TextField
+          label="Data de Pagamento"
+          name="paymentDate"
+          type="date"
+          value={form.paymentDate}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          InputLabelProps={{ shrink: true }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose} disabled={loading}>Cancelar</Button>
+        <Button onClick={handleSubmit} disabled={!isValid || loading} variant="contained" color="primary">
+          {initialData ? 'Salvar' : 'Criar'}
+        </Button>
+      </DialogActions>
+    </Dialog>
   );
 } 
