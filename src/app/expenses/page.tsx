@@ -5,6 +5,7 @@ import { ExpenseForm } from '@/features/expenses/components/ExpenseForm';
 import { useExpenses } from '@/features/expenses/hooks/useExpenses';
 import { createExpense, updateExpense, deleteExpense } from '@/features/expenses/services/expensesService';
 import { ExpenseFormData } from '@/features/expenses/schemas';
+import type { Expense } from '@/features/expenses/components/ExpenseTable';
 
 // Simulação de userId (ajuste para pegar do contexto/auth real)
 const userId = 'demo-user-id';
@@ -12,10 +13,10 @@ const userId = 'demo-user-id';
 export default function ExpensesPage() {
   const { expenses, isLoading, error, refresh } = useExpenses(userId);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<any | null>(null);
+  const [editing, setEditing] = useState<Expense | null>(null);
   const [search, setSearch] = useState('');
 
-  const filteredExpenses = expenses.filter((e: any) =>
+  const filteredExpenses = expenses.filter((e: Expense) =>
     e.account?.toLowerCase().includes(search.toLowerCase()) ||
     e.group?.toLowerCase().includes(search.toLowerCase()) ||
     e.subgroup?.toLowerCase().includes(search.toLowerCase())
@@ -32,7 +33,7 @@ export default function ExpensesPage() {
     refresh();
   }
 
-  async function handleDelete(exp: any) {
+  async function handleDelete(exp: Expense) {
     if (window.confirm('Excluir esta despesa?')) {
       await deleteExpense(exp.id, userId);
       refresh();

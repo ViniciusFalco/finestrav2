@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface Expense {
+export interface Expense {
   id: string;
   account: string;
   group: string;
