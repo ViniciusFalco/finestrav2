@@ -1,9 +1,9 @@
 import { useUser } from '@/hooks/useUser';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ChevronDown, LogOut, Settings } from 'lucide-react';
-import { supabaseBrowser } from '@/lib/supabaseClient.browser';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 export default function UserMenu() {
   const { name, avatarUrl } = useUser();
@@ -11,7 +11,6 @@ export default function UserMenu() {
   const [showConfig, setShowConfig] = useState(false);
 
   const handleSignOut = async () => {
-    const supabase = supabaseBrowser();
     await supabase.auth.signOut({ scope: 'global' });
     router.push('/login');
   };

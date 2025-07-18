@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabaseBrowser } from '@/lib/supabaseClient.browser';
+import { supabase } from '@/lib/supabaseClient';
 
 interface UserInfo {
   name: string;
@@ -12,7 +12,6 @@ export function useUser(): UserInfo {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const supabase = supabaseBrowser();
       const { data } = await supabase.auth.getUser();
       let name = 'Usuário';
       let avatarUrl = undefined;
@@ -31,7 +30,6 @@ export function useUser(): UserInfo {
   }, []);
 
   const signOut = async () => {
-    const supabase = supabaseBrowser();
     await supabase.auth.signOut();
     window.location.href = '/login';
   };

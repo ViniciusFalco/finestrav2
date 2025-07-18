@@ -1,14 +1,14 @@
-import { supabaseBrowser } from '@/lib/supabaseClient.browser';
+import { supabase } from '@/lib/supabaseClient';
 import { ExpenseFormData } from '../schemas';
 
 async function getUserId() {
-  const { data } = await supabaseBrowser().auth.getUser();
+  const { data } = await supabase.auth.getUser();
   return data.user?.id;
 }
 
 export async function listExpenses() {
   const userId = await getUserId();
-  const { data, error } = await supabaseBrowser()
+  const { data, error } = await supabase
     .from('expenses')
     .select('*, account:accounts(id, name), category:categories(id, name, parent_id)')
     .eq('user_id', userId)
@@ -30,7 +30,7 @@ export async function createExpense(dto: CreateExpenseDTO) {
   const userId = await getUserId();
   // Valor total = valor + juros (calculado antes do insert)
   const total = (dto.value ?? 0) + (dto.interest ?? 0);
-  const { data, error } = await supabaseBrowser()
+  const { data, error } = await supabase
     .from('expenses')
     .insert([{ 
       user_id: userId,
@@ -51,7 +51,7 @@ export async function createExpense(dto: CreateExpenseDTO) {
 
 export async function updateExpense(id: string, dto: Partial<ExpenseFormData & { account_id: string; category_id: string }>) {
   const userId = await getUserId();
-  const { data, error } = await supabaseBrowser()
+  const { data, error } = await supabase
     .from('expenses')
     .update(dto)
     .eq('id', id)
@@ -64,7 +64,7 @@ export async function updateExpense(id: string, dto: Partial<ExpenseFormData & {
 
 export async function deleteExpense(id: string) {
   const userId = await getUserId();
-  const { error } = await supabaseBrowser()
+  const { error } = await supabase
     .from('expenses')
     .delete()
     .eq('id', id)

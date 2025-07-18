@@ -1,5 +1,5 @@
 import useSWR from 'swr';
-import { createBrowserSupabaseClient } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabaseClient';
 
 export interface Category {
   id: string;
@@ -9,7 +9,6 @@ export interface Category {
 }
 
 async function fetchCategories() {
-  const supabase = createBrowserSupabaseClient();
   const { data, error } = await supabase
     .from('categories')
     .select('*');

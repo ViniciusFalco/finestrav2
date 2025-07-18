@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabaseBrowser } from '@/lib/supabaseClient.browser';
+import { supabase } from '@/lib/supabaseClient';
 
 export interface DashboardFilter {
   start: Date;
@@ -96,7 +96,6 @@ export function useDashboardData(filters: DashboardFilter) {
       setLoading(true);
       setError(null);
       try {
-        const supabase = supabaseBrowser();
         
         // Construir filtros de data
         const startDate = start.toISOString().split('T')[0];

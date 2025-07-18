@@ -1,6 +1,4 @@
-import { createBrowserSupabaseClient } from '@/lib/supabaseClient';
-
-const supabase = createBrowserSupabaseClient();
+import { supabase } from '@/lib/supabaseClient';
 
 export type AccountDTO = {
   name: string; // “Minha conta Nubank”
