@@ -17,7 +17,16 @@ export async function listExpenses() {
   return data;
 }
 
-export async function createExpense(dto: ExpenseFormData & { account_id: string; category_id: string }) {
+export interface CreateExpenseDTO {
+  account_id: string;
+  category_id: string;
+  value: number;
+  interest?: number;
+  dueDate: string;
+  paymentDate?: string | null;
+}
+
+export async function createExpense(dto: CreateExpenseDTO) {
   const userId = await getUserId();
   // Valor total = valor + juros (calculado antes do insert)
   const total = (dto.value ?? 0) + (dto.interest ?? 0);

@@ -23,7 +23,7 @@ export default function ExpenseTable({ data }: ExpenseTableProps) {
         </TableRow>
       </TableHead>
       <TableBody>
-        {data.map((expense) => (
+        {data.map((expense: any) => (
           <TableRow key={expense.id}>
             <TableCell>{expense.account?.name}</TableCell>
             <TableCell>{expense.account?.group}</TableCell>

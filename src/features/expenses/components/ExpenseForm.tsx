@@ -4,6 +4,10 @@ import { useCategories } from '@/features/ads/hooks/useCategories';
 import { createExpense, updateExpense } from '../services/expensesService';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, TextField } from '@mui/material';
 import dayjs from 'dayjs';
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore';
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+dayjs.extend(isSameOrBefore);
+dayjs.extend(isSameOrAfter);
 
 interface ExpenseFormProps {
   open: boolean;
@@ -45,7 +49,8 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
     setLoading(true);
     try {
       const dto = {
-        ...form,
+        account_id: form.account_id,
+        category_id: form.category_id,
         value: Number(form.value),
         interest: Number(form.interest) || 0,
         dueDate: form.dueDate,
@@ -89,7 +94,7 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
           margin="normal"
           required
         >
-          {accounts.map((acc: unknown) => (
+          {accounts.map((acc: any) => (
             <MenuItem key={acc.id} value={acc.id}>{acc.name}</MenuItem>
           ))}
         </TextField>
@@ -104,7 +109,7 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
           required
           disabled={!form.account_id}
         >
-          {groups.map((g: unknown) => (
+          {groups.map((g: any) => (
             <MenuItem key={g} value={g}>{g}</MenuItem>
           ))}
         </TextField>
@@ -119,7 +124,7 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
           required
           disabled={!form.group}
         >
-          {subgroups.map((sg: unknown) => (
+          {subgroups.map((sg: any) => (
             <MenuItem key={sg.id} value={sg.id}>{sg.name}</MenuItem>
           ))}
         </TextField>
