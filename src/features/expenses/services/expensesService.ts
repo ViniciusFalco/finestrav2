@@ -28,24 +28,19 @@ export interface CreateExpenseDTO {
 
 export async function createExpense(dto: CreateExpenseDTO) {
   const userId = await getUserId();
-  // Valor total = valor + juros (calculado antes do insert)
-  const total = (dto.value ?? 0) + (dto.interest ?? 0);
   const { data, error } = await supabase
     .from('expenses')
     .insert([{ 
       user_id: userId,
       account_id: dto.account_id,
-      category_id: dto.category_id, // FK para categories
-      value: dto.value,
-      interest: dto.interest ?? 0,
-      total,
-      due_date: dto.dueDate,
-      payment_date: dto.paymentDate ?? null
+      category_id: dto.category_id,
+      amount: dto.value, // valor
+      date: dto.dueDate, // data de vencimento
+      // description: dto.description, // se usar
     }])
     .select()
     .single();
   if (error) throw error;
-  // Status é calculado no SQL (ver regra de negócio)
   return data;
 }
 

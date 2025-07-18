@@ -77,10 +77,9 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
       const dto = {
         account_id: form.account_id,
         category_id: accounts.find((a: any) => a.id === form.account_id)?.subgroup || '',
-        value: Number(form.value),
-        interest: Number(form.interest) || 0,
-        dueDate: form.dueDate,
-        paymentDate: form.paymentDate || null,
+        value: Number(form.value), // será enviado como amount
+        dueDate: form.dueDate, // será enviado como date
+        // description: form.description, // se usar
       };
       if ((initialData as any)?.id) {
         await updateExpense((initialData as any).id, dto);
