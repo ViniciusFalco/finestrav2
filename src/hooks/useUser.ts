@@ -4,10 +4,11 @@ import { supabaseBrowser } from '@/lib/supabaseClient.browser';
 interface UserInfo {
   name: string;
   avatarUrl?: string;
+  signOut: () => Promise<void>;
 }
 
 export function useUser(): UserInfo {
-  const [user, setUser] = useState<UserInfo>({ name: 'Usuário' });
+  const [user, setUser] = useState<{ name: string; avatarUrl?: string }>({ name: 'Usuário' });
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -29,5 +30,11 @@ export function useUser(): UserInfo {
     fetchUser();
   }, []);
 
-  return user;
+  const signOut = async () => {
+    const supabase = supabaseBrowser();
+    await supabase.auth.signOut();
+    window.location.href = '/login';
+  };
+
+  return { ...user, signOut };
 } 
