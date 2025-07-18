@@ -10,7 +10,8 @@ export default function ExpensesPage() {
   const { expenses, isLoading, error, refresh } = useExpenses();
   const { accounts } = useAccounts();
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<any | null>(null); // eslint-disable-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [editing, setEditing] = useState<any | null>(null);
   const [search, setSearch] = useState('');
   const [toast, setToast] = useState<string | null>(null);
 

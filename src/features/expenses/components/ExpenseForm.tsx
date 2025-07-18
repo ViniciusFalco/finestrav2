@@ -9,6 +9,7 @@ interface ExpenseFormProps {
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   initialData?: any;
 }
 
@@ -104,7 +105,7 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
           required
           disabled={!form.account_id}
         >
-          {groups.map((g: string) => (
+          {groups.map((g: any) => (
             <MenuItem key={g} value={g}>{g}</MenuItem>
           ))}
         </TextField>
