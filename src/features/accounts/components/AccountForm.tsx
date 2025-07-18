@@ -46,16 +46,22 @@ export default function AccountForm({ open, onClose, onSuccess, initialData }: A
 
   const handleSubmit = async () => {
     setLoading(true);
+    console.log('submit', form);
     try {
-      if (initialData?.id) {
-        await updateAccount(initialData.id, form);
+      if (form.name && form.group && form.subgroup) {
+        if (initialData?.id) {
+          await updateAccount(initialData.id, form);
+        } else {
+          await createAccount(form);
+        }
+        onSuccess();
+        onClose();
       } else {
-        await createAccount(form);
+        alert('Preencha todos os campos obrigatórios!');
       }
-      onSuccess();
-      onClose();
     } catch (e) {
-      // TODO: tratar erro
+      console.error('Erro ao criar conta:', e);
+      alert('Erro ao criar conta: ' + (e instanceof Error ? e.message : e));
     } finally {
       setLoading(false);
     }
