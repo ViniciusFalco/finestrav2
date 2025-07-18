@@ -47,10 +47,36 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
 
   const handleSubmit = async () => {
     setLoading(true);
+    // Validação manual
+    if (!form.account_id || !accounts.find((a: any) => a.id === form.account_id)) {
+      alert('Selecione uma conta válida.');
+      setLoading(false);
+      return;
+    }
+    if (!form.value || Number(form.value) <= 0) {
+      alert('Informe um valor maior que zero.');
+      setLoading(false);
+      return;
+    }
+    if (!form.dueDate) {
+      alert('Informe a data de vencimento.');
+      setLoading(false);
+      return;
+    }
+    if (form.paymentDate && dayjs(form.paymentDate).isAfter(dayjs(), 'day')) {
+      alert('A data de pagamento não pode ser no futuro.');
+      setLoading(false);
+      return;
+    }
+    if (dayjs(form.dueDate).isBefore(dayjs(), 'day')) {
+      alert('A data de vencimento não pode ser no passado.');
+      setLoading(false);
+      return;
+    }
     try {
       const dto = {
         account_id: form.account_id,
-        category_id: form.category_id,
+        category_id: accounts.find((a: any) => a.id === form.account_id)?.subgroup || '',
         value: Number(form.value),
         interest: Number(form.interest) || 0,
         dueDate: form.dueDate,
@@ -64,7 +90,7 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
       onSuccess();
       onClose();
     } catch (e) {
-      // TODO: tratar erro
+      alert('Erro ao salvar despesa.');
     } finally {
       setLoading(false);
     }
@@ -159,7 +185,7 @@ export default function ExpenseForm({ open, onClose, onSuccess, initialData }: E
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>Cancelar</Button>
-        <Button onClick={handleSubmit} disabled={!isValid || loading} variant="contained" color="primary">
+        <Button onClick={handleSubmit} disabled={loading} variant="contained" color="primary">
           {initialData ? 'Salvar' : 'Criar'}
         </Button>
       </DialogActions>
